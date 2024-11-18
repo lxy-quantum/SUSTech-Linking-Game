@@ -1,4 +1,4 @@
-package org.example.demo;
+package org.example.assign2;
 
 public class Game {
 

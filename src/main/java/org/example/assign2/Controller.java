@@ -1,4 +1,4 @@
-package org.example.demo;
+package org.example.assign2;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

@@ -1,4 +1,4 @@
-package org.example.demo;
+package org.example.assign2;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-import static org.example.demo.Game.SetupBoard;
+import static org.example.assign2.Game.SetupBoard;
 
 public class Application extends javafx.application.Application {
 
