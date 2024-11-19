@@ -9,10 +9,16 @@ import javafx.scene.layout.GridPane;
 
 import java.util.Objects;
 
-public class Controller {
+public class GameController {
+
+    @FXML
+    public Button welcomeButton;
 
     @FXML
     private Label scoreLabel;
+
+    @FXML
+    public Button resetButton;
 
     @FXML
     private GridPane gameBoard;
@@ -45,18 +51,20 @@ public class Controller {
                 gameBoard.add(button, col, row);
             }
         }
+
+
     }
 
     private void handleButtonPress(int row, int col) {
         System.out.println("Button pressed at: " + row + ", " + col);
-        if(position[0] == 0){
+        if (position[0] == 0) {
             position[1] = row;
             position[2] = col;
             position[0] = 1;
-        }else{
+        } else {
             boolean change = game.judge(position[1], position[2], row, col);
             position[0] = 0;
-            if(change){
+            if (change) {
                 // TODO: handle the grid deletion logic
             }
         }
@@ -64,7 +72,7 @@ public class Controller {
 
     @FXML
     private void handleReset() {
-
+        System.out.println("Reset");
     }
 
     public ImageView addContent(int content){

@@ -2,25 +2,20 @@ package org.example.assign2;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 
-import static org.example.assign2.Game.SetupBoard;
+import static org.example.assign2.Game.setUpBoard;
 
 public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-
-        int[] size = getBoardSizeFromUser();
-        Controller.game = new Game(SetupBoard(size[0], size[1]));
-
-        FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("board.fxml"));
-        VBox root = fxmlLoader.load();
-        Controller controller = fxmlLoader.getController();
-        controller.createGameBoard();
+        FXMLLoader fxmlLoader = new FXMLLoader(Application.class.getResource("welcome.fxml"));
+        AnchorPane root = fxmlLoader.load();
 
         Scene scene = new Scene(root);
         stage.setTitle("Hello!");
@@ -33,7 +28,6 @@ public class Application extends javafx.application.Application {
 
     // let user choose board size
     private int[] getBoardSizeFromUser() {
-
         // TODO: let user choose board size
 
         return new int[]{4, 4};

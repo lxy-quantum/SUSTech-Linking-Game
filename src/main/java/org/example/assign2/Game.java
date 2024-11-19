@@ -1,5 +1,7 @@
 package org.example.assign2;
 
+import java.util.Random;
+
 public class Game {
 
     // row length
@@ -18,18 +20,24 @@ public class Game {
     }
 
     // randomly initialize the game board
-    public static int[][] SetupBoard(int row, int col) {
-
+    public static int[][] setUpBoard(int row, int col) {
         // TODO: randomly initialize board
-
-        return new int[][]{
-                {0, 0, 0, 0, 0, 0},
-                {0, 1, 1, 2, 2, 0},
-                {0, 3, 3, 4, 4, 0},
-                {0, 5, 5, 6, 6, 0},
-                {0, 7, 7, 8, 8, 0},
-                {0, 0, 0, 0, 0, 0}
-        };
+        Random rand = new Random();
+        int[][] board = new int[row][col];
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                board[i][j] = rand.nextInt(9);
+            }
+        }
+        return board;
+//        return new int[][]{
+//                {0, 0, 0, 0, 0, 0},
+//                {0, 1, 1, 2, 2, 0},
+//                {0, 3, 3, 4, 4, 0},
+//                {0, 5, 5, 6, 6, 0},
+//                {0, 7, 7, 8, 8, 0},
+//                {0, 0, 0, 0, 0, 0}
+//        };
     }
 
     // judge the validity of an operation
