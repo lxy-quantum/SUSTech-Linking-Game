@@ -1,18 +1,26 @@
 package org.assign2;
 
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import java.util.Objects;
 
 public class GameController {
 
     @FXML
-    public Button welcomeButton;
+    public StackPane gamePane;
+    @FXML
+    private GridPane gameBoard;
 
     @FXML
     private Label scoreLabel;
@@ -20,8 +28,6 @@ public class GameController {
     @FXML
     public Button resetButton;
 
-    @FXML
-    private GridPane gameBoard;
 
     public static Game game;
 
@@ -41,6 +47,7 @@ public class GameController {
         for (int row = 0; row < game.row; row++) {
             for (int col = 0; col < game.col; col++) {
                 Button button = new Button();
+                button.setMinSize(40, 40);
                 button.setPrefSize(40, 40);
                 ImageView imageView = addContent(game.board[row][col]);
                 imageView.setFitWidth(30);
@@ -57,22 +64,37 @@ public class GameController {
 
     private void handleButtonPress(Button button, int row, int col) {
         System.out.println("Button pressed at: " + row + ", " + col);
+        button.setStyle("-fx-border-color: #ff8c00; -fx-border-width: 2px;");
         if (position[0] == 0) {
             position[1] = row;
             position[2] = col;
             position[0] = 1;
             lastButton = button;
         } else {
-            boolean change = game.judge(position[1], position[2], row, col);
             position[0] = 0;
+            boolean change = game.judge(position[1], position[2], row, col);
             if (change) {
                 //handle the grid deletion logic
                 game.board[position[1]][position[2]] = 0;
                 game.board[row][col] = 0;
-                deleteGrid(button, row, col);
-                deleteGrid(lastButton, position[1], position[2]);
-                score++;
-                scoreLabel.setText(Integer.toString(score));
+                PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
+                delay.setOnFinished(e -> {
+                    deleteGrid(button, row, col);
+                    deleteGrid(lastButton, position[1], position[2]);
+                    score++;
+                    scoreLabel.setText(Integer.toString(score));
+                });
+                delay.play();
+            }
+            else {
+                System.out.println("failed!");
+                PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
+                delay.setOnFinished(e -> {
+                    addPopup((StackPane) gameBoard.getParent());
+                    lastButton.setStyle("");
+                    button.setStyle("");
+                });
+                delay.play();
             }
         }
     }
@@ -89,6 +111,7 @@ public class GameController {
     public void deleteGrid(Button button, int row, int col) {
         ((GridPane) button.getParent()).getChildren().remove(button);
         Button newButton = new Button();
+        newButton.setMinSize(40, 40);
         newButton.setPrefSize(40, 40);
         ImageView imageView = new ImageView(imageCarambola);
         imageView.setFitWidth(30);
@@ -97,6 +120,20 @@ public class GameController {
         newButton.setGraphic(imageView);
         newButton.setOnAction( _ -> handleButtonPress(button, row, col));
         gameBoard.add(newButton, col, row);
+    }
+
+    public void addPopup(StackPane gamePane) {
+        VBox popupBox = new VBox(10);
+        popupBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #ff8c00; -fx-border-width: 2px; -fx-padding: 10;");
+        popupBox.setAlignment(Pos.CENTER);
+        popupBox.setPrefSize(80, 50);
+
+        Text popupText = new Text("Failed!");
+        Button closeButton = new Button("close");
+        closeButton.setOnAction(event -> gamePane.getChildren().remove(popupBox));
+        popupBox.getChildren().addAll(popupText, closeButton);
+
+        gamePane.getChildren().add(popupBox);
     }
 
     public ImageView addContent(int content){

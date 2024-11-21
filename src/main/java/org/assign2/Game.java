@@ -21,11 +21,12 @@ public class Game {
 
     // randomly initialize the game board
     public static int[][] setUpBoard(int row, int col) {
+        //TODO: pairs
         Random rand = new Random();
         int[][] board = new int[row][col];
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                board[i][j] = rand.nextInt(9);
+                board[i][j] = rand.nextInt(12);
             }
         }
         return board;
