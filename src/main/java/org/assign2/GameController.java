@@ -26,6 +26,9 @@ public class GameController {
     public static Game game;
 
     int[] position = new int[3];
+    Button lastButton;
+
+    int score = 0;
 
     @FXML
     public void initialize() {
@@ -46,23 +49,30 @@ public class GameController {
                 button.setGraphic(imageView);
                 int finalRow = row;
                 int finalCol = col;
-                button.setOnAction( _ -> handleButtonPress(finalRow, finalCol));
+                button.setOnAction( _ -> handleButtonPress(button, finalRow, finalCol));
                 gameBoard.add(button, col, row);
             }
         }
     }
 
-    private void handleButtonPress(int row, int col) {
+    private void handleButtonPress(Button button, int row, int col) {
         System.out.println("Button pressed at: " + row + ", " + col);
         if (position[0] == 0) {
             position[1] = row;
             position[2] = col;
             position[0] = 1;
+            lastButton = button;
         } else {
             boolean change = game.judge(position[1], position[2], row, col);
             position[0] = 0;
             if (change) {
-                // TODO: handle the grid deletion logic
+                //handle the grid deletion logic
+                game.board[position[1]][position[2]] = 0;
+                game.board[row][col] = 0;
+                deleteGrid(button, row, col);
+                deleteGrid(lastButton, position[1], position[2]);
+                score++;
+                scoreLabel.setText(Integer.toString(score));
             }
         }
     }
@@ -70,6 +80,23 @@ public class GameController {
     @FXML
     private void handleReset() {
         System.out.println("Reset");
+        score = 0;
+        scoreLabel.setText("0");
+        game.board = Game.setUpBoard(game.row, game.col);
+        createGameBoard();
+    }
+
+    public void deleteGrid(Button button, int row, int col) {
+        ((GridPane) button.getParent()).getChildren().remove(button);
+        Button newButton = new Button();
+        newButton.setPrefSize(40, 40);
+        ImageView imageView = new ImageView(imageCarambola);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        imageView.setPreserveRatio(true);
+        newButton.setGraphic(imageView);
+        newButton.setOnAction( _ -> handleButtonPress(button, row, col));
+        gameBoard.add(newButton, col, row);
     }
 
     public ImageView addContent(int content){

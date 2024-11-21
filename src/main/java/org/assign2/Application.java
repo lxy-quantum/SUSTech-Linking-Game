@@ -23,13 +23,6 @@ public class Application extends javafx.application.Application {
 
     }
 
-    // let user choose board size
-    private int[] getBoardSizeFromUser() {
-        // TODO: let user choose board size
-
-        return new int[]{4, 4};
-    }
-
     public static void main(String[] args) {
         launch();
     }
