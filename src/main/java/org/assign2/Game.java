@@ -21,7 +21,6 @@ public class Game {
 
     // randomly initialize the game board
     public static int[][] setUpBoard(int row, int col) {
-        // TODO: randomly initialize board
         Random rand = new Random();
         int[][] board = new int[row][col];
         for (int i = 0; i < row; i++) {
@@ -30,14 +29,6 @@ public class Game {
             }
         }
         return board;
-//        return new int[][]{
-//                {0, 0, 0, 0, 0, 0},
-//                {0, 1, 1, 2, 2, 0},
-//                {0, 3, 3, 4, 4, 0},
-//                {0, 5, 5, 6, 6, 0},
-//                {0, 7, 7, 8, 8, 0},
-//                {0, 0, 0, 0, 0, 0}
-//        };
     }
 
     // judge the validity of an operation

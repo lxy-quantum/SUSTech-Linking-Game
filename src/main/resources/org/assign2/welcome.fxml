@@ -9,9 +9,17 @@
 <AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.assign2.WelcomeController" prefHeight="400.0" prefWidth="600.0">
     <Label text="Welcome to linking game"/>
 
-    <Button text="Row" fx:id="rowButton" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="50"/>
+    <VBox fx:id="rowBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="20.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
+        <Label text="Choose the row"/>
+        <TextField promptText="Row: " fx:id="rowField"/>
+    </VBox>
 
-    <Button text="Column" fx:id="colButton" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="50"/>
+    <VBox fx:id="colBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="100.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
+        <Label text="Choose the column"/>
+        <TextField promptText="Column: " fx:id="colField"/>
+    </VBox>
 
     <Button text="Start!" fx:id="startButton" AnchorPane.bottomAnchor="10" onAction="#handleStart"/>
 </AnchorPane>

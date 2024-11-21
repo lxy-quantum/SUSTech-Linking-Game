@@ -33,7 +33,6 @@ public class GameController {
     }
 
     public void createGameBoard() {
-
         gameBoard.getChildren().clear();
 
         for (int row = 0; row < game.row; row++) {
@@ -51,8 +50,6 @@ public class GameController {
                 gameBoard.add(button, col, row);
             }
         }
-
-
     }
 
     private void handleButtonPress(int row, int col) {
