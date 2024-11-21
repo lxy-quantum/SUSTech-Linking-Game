@@ -3,6 +3,8 @@ module org.example.assign2 {
     requires javafx.fxml;
 
 
-    opens org.example.assign2 to javafx.fxml;
-    exports org.example.assign2;
+    opens org.assign2 to javafx.fxml;
+    exports org.assign2;
+    exports org.example;
+    opens org.example to javafx.fxml;
 }

@@ -1,4 +1,4 @@
-package org.example.assign2;
+package org.assign2;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,8 +8,6 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-
-import static org.example.assign2.Game.setUpBoard;
 
 public class WelcomeController {
     @FXML
@@ -25,7 +23,7 @@ public class WelcomeController {
     public void handleStart(ActionEvent event) throws IOException {
         int[] size = getBoardSizeFromUser();
 
-        GameController.game = new Game(setUpBoard(size[0], size[1]));
+        GameController.game = new Game(Game.setUpBoard(size[0], size[1]));
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
         Scene gameScene = new Scene(fxmlLoader.load());

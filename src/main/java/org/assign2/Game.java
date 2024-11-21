@@ -1,4 +1,4 @@
-package org.example.assign2;
+package org.assign2;
 
 import java.util.Random;
 
