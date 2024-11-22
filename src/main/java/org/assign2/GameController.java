@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import java.net.Socket;
 import java.util.Objects;
 
 public class GameController {
@@ -28,13 +29,18 @@ public class GameController {
     @FXML
     public Button resetButton;
 
-
     public static Game game;
+
+    Socket clientSocket;
 
     int[] position = new int[3];
     Button lastButton;
 
     int score = 0;
+
+    public void setClientSocket(Socket socket) {
+        this.clientSocket = socket;
+    }
 
     @FXML
     public void initialize() {

@@ -6,20 +6,46 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.assign2.WelcomeController" prefHeight="400.0" prefWidth="600.0">
-    <Label text="Welcome to linking game"/>
+<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="org.assign2.WelcomeController" prefHeight="400.0" prefWidth="600.0">
+    <Label text="Welcome to linking game" fx:id="title" AnchorPane.topAnchor="5.0" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0"/>
+
+    <Button text="Register" fx:id="registerButton" AnchorPane.topAnchor="100" AnchorPane.bottomAnchor="100" AnchorPane.leftAnchor="60.0"
+            AnchorPane.rightAnchor="380.0" onAction="#gotoRegister"/>
+
+    <Button text="Log in" fx:id="loginButton" AnchorPane.topAnchor="100" AnchorPane.bottomAnchor="100" AnchorPane.leftAnchor="380.0"
+            AnchorPane.rightAnchor="60.0" onAction="#gotoLogin"/>
 
     <VBox fx:id="rowBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
-          AnchorPane.topAnchor="20.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
+          AnchorPane.topAnchor="90.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
         <Label text="Choose the row"/>
         <TextField promptText="Row: " fx:id="rowField"/>
     </VBox>
 
     <VBox fx:id="colBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
-          AnchorPane.topAnchor="100.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
+          AnchorPane.topAnchor="180.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
         <Label text="Choose the column"/>
         <TextField promptText="Column: " fx:id="colField"/>
     </VBox>
 
-    <Button text="Start!" fx:id="startButton" AnchorPane.bottomAnchor="10" onAction="#handleStart"/>
+    <VBox fx:id="regInfoBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="150.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
+        <Label text="Enter your ID: "/>
+        <TextField promptText="ID: " fx:id="regIdField"/>
+        <Label text="Enter your password: "/>
+        <TextField promptText="password: " fx:id="regPwdField"/>
+        <Button text="Register" onAction="#handleRegister"/>
+    </VBox>
+
+    <VBox fx:id="loginInfoBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="150.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
+        <Label text="Enter your ID: "/>
+        <TextField promptText="ID: " fx:id="loginIdField"/>
+        <Label text="Enter your password: "/>
+        <TextField promptText="password: " fx:id="loginPwdField"/>
+        <Button text="Register" onAction="#handleLogin"/>
+    </VBox>
+
+    <Button text="Start!" fx:id="startButton" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="250.0"
+            AnchorPane.rightAnchor="250.0" onAction="#handleStart" visible="false" managed="false"/>
+
 </AnchorPane>
