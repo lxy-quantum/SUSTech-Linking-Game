@@ -26,14 +26,42 @@ public class GameService implements Runnable {
         String command = in.next();
         while (true) {
             switch (command) {
-                case "REGISTER":
-                    out.println("200 OK");
+                case "REGISTER": {
+                    String id = in.next();
+                    String password = in.next();
+                    handleRegister(id, password);
                     break;
-                case "LOGIN":
+                }
+                case "LOGIN": {
+                    String id = in.next();
+                    String password = in.next();
+                    handleLogin(id, password);
                     break;
+                }
                 case "RANDOM_RIVAL":
                 case "PICK_RIVAL":
             }
         }
+    }
+
+    private void handleRegister(String id, String password) {
+        if (players.containsKey(id)) {
+            out.println("400 already registered");
+            return;
+        }
+        players.put(id, new Player(id, password));
+        out.println("200 OK registered");
+    }
+
+    private void handleLogin(String id, String password) {
+        if (!players.containsKey(id)) {
+            out.println("400 wrong ID");
+            return;
+        }
+        if (!players.get(id).password.equals(password)) {
+            out.println("400 wrong password");
+            return;
+        }
+        out.println("200 OK logged in");
     }
 }

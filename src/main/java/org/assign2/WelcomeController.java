@@ -28,16 +28,11 @@ public class WelcomeController {
     public Button registerButton;
     @FXML
     public Button loginButton;
-    @FXML
-    public Button startButton;
 
     @FXML
-    public VBox rowBox;
+    public VBox rowColBox;
     @FXML
     public TextField rowField;
-
-    @FXML
-    public VBox colBox;
     @FXML
     public TextField colField;
 
@@ -62,14 +57,14 @@ public class WelcomeController {
     }
 
     @FXML
-    public void gotoRegister(ActionEvent event) {
+    public void gotoRegister() {
         hideNode(registerButton);
         hideNode(loginButton);
         showNode(regInfoBox);
     }
 
     @FXML
-    public void handleRegister(ActionEvent event) throws IOException {
+    public void handleRegister() throws IOException {
         String id = regIdField.getText();
         String password = regPwdField.getText();
         if (id.isEmpty() || password.isEmpty()) {
@@ -81,11 +76,11 @@ public class WelcomeController {
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             out.println("REGISTER " + id + " " + password);
             String response = in.readLine();
-            if (response.equals("200 OK")) {
-                Button button = new Button("Registered!");
+            if (response.equals("200 OK registered")) {
+                hideNode(regInfoBox);
+                Button button = new Button("registered");
                 button.setOnAction(e -> {
                     root.getChildren().remove(button);
-                    hideNode(regInfoBox);
                     showNode(registerButton);
                     showNode(loginButton);
                 });
@@ -99,15 +94,40 @@ public class WelcomeController {
     }
 
     @FXML
-    public void gotoLogin(ActionEvent event) {
+    public void gotoLogin() {
         hideNode(registerButton);
         hideNode(loginButton);
-        showNode(regInfoBox);
+        showNode(loginInfoBox);
     }
 
     @FXML
-    public void handleLogin(ActionEvent event) {
+    public void handleLogin() throws IOException {
+        String id = loginIdField.getText();
+        String password = loginPwdField.getText();
+        if (id.isEmpty() || password.isEmpty()) {
+            Button button = new Button("ID and password mustn't be empty!");
+            button.setOnAction(e -> root.getChildren().remove(button));
+            root.getChildren().add(button);
+        } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+            out.println("LOGIN " + id + " " + password);
+            String response = in.readLine();
+            if (response.equals("200 OK logged in")) {
+                hideNode(loginInfoBox);
+                Button button = new Button("successful");
+                button.setOnAction(e -> {
+                    root.getChildren().remove(button);
+                    showNode(rowColBox);
+                });
+                root.getChildren().add(button);
 
+            } else {
+                Button button = new Button("Account ID already exists!");
+                button.setOnAction(e -> root.getChildren().remove(button));
+                root.getChildren().add(button);
+            }
+        }
     }
 
     @FXML
@@ -149,6 +169,14 @@ public class WelcomeController {
     public void showNode(Node node) {
         node.setVisible(true);
         node.setManaged(true);
+    }
+
+    @FXML
+    public void backToBeginning() {
+        hideNode(regInfoBox);
+        hideNode(loginInfoBox);
+        showNode(registerButton);
+        showNode(loginButton);
     }
 }
 
