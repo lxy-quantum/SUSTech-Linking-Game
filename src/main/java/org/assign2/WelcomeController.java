@@ -50,6 +50,13 @@ public class WelcomeController {
     @FXML
     public TextField loginPwdField;
 
+    @FXML
+    public VBox matchOrPickBox;
+    @FXML
+    public VBox waitingBox;
+    @FXML
+    public VBox waitingForBoardBox;
+
     Socket clientSocket;
 
     public void setClientSocket(Socket socket) {
@@ -118,7 +125,7 @@ public class WelcomeController {
                 Button button = new Button("successful");
                 button.setOnAction(e -> {
                     root.getChildren().remove(button);
-                    showNode(rowColBox);
+                    showNode(matchOrPickBox);
                 });
                 root.getChildren().add(button);
 
@@ -128,6 +135,55 @@ public class WelcomeController {
                 root.getChildren().add(button);
             }
         }
+    }
+
+    @FXML
+    public void gotoMatching() throws IOException {
+        hideNode(matchOrPickBox);
+        matching();
+    }
+
+    public void matching() throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+        out.println("MATCH");
+        String response = in.readLine();
+        if (response.equals("200 OK matching")) {
+            showNode(waitingBox);
+            String matchingResult = in.readLine();
+            if (matchingResult.equals("200 OK matched")) {
+                String matchedID = in.readLine();
+                String rowColResponse = in.readLine();
+                hideNode(waitingBox);
+                Button button = new Button("Matched with " + matchedID);
+                button.setOnAction(e -> {
+                    root.getChildren().remove(button);
+                    //start picking row and cols
+                    if (rowColResponse.equals("choose row and column")) {
+                        showNode(rowColBox);
+                    } else if (rowColResponse.equals("no need to choose")) {
+                        showNode(waitingForBoardBox);
+                        try {
+                            String rowColResult = in.readLine();
+                            if (rowColResult.equals("board settled")) {
+                                hideNode(waitingForBoardBox);
+                                //receive the board
+                            }
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    } else {
+                        System.out.println("error!");
+                    }
+                });
+                root.getChildren().add(button);
+            }
+        }
+    }
+
+    @FXML
+    public void gotoPicking() {
+        hideNode(matchOrPickBox);
     }
 
     @FXML
@@ -146,6 +202,14 @@ public class WelcomeController {
         Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
         stage.setScene(gameScene);
         stage.setTitle("Game");
+    }
+
+    @FXML
+    public void backToBeginning() {
+        hideNode(regInfoBox);
+        hideNode(loginInfoBox);
+        showNode(registerButton);
+        showNode(loginButton);
     }
 
     // let user choose board size
@@ -169,14 +233,6 @@ public class WelcomeController {
     public void showNode(Node node) {
         node.setVisible(true);
         node.setManaged(true);
-    }
-
-    @FXML
-    public void backToBeginning() {
-        hideNode(regInfoBox);
-        hideNode(loginInfoBox);
-        showNode(registerButton);
-        showNode(loginButton);
     }
 }
 

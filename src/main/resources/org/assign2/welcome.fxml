@@ -15,15 +15,6 @@
     <Button text="Log in" fx:id="loginButton" AnchorPane.topAnchor="100" AnchorPane.bottomAnchor="100" AnchorPane.leftAnchor="380.0"
             AnchorPane.rightAnchor="60.0" onAction="#gotoLogin"/>
 
-    <VBox fx:id="rowColBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
-          AnchorPane.topAnchor="90.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
-        <Label text="Choose the row"/>
-        <TextField promptText="Row: " fx:id="rowField"/>
-        <Label text="Choose the column"/>
-        <TextField promptText="Column: " fx:id="colField"/>
-        <Button text="start" onAction="#handleStart"/>
-    </VBox>
-
     <VBox fx:id="regInfoBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
           AnchorPane.topAnchor="150.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
         <Label text="Enter your ID: "/>
@@ -42,6 +33,31 @@
         <TextField promptText="password: " fx:id="loginPwdField"/>
         <Button text="Log in" onAction="#handleLogin"/>
         <Button text="Back" onAction="#backToBeginning"/>
+    </VBox>
+
+    <VBox fx:id="matchOrPickBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="150.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
+        <Button text="random matching" onAction="#gotoMatching"/>
+        <Button text="pick your rival" onAction="#gotoPicking"/>
+    </VBox>
+
+    <VBox fx:id="waitingBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="150.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
+        <Label text="waiting for the other party..."/>
+    </VBox>
+
+    <VBox fx:id="rowColBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="90.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
+        <Label text="Choose the row"/>
+        <TextField promptText="Row: " fx:id="rowField"/>
+        <Label text="Choose the column"/>
+        <TextField promptText="Column: " fx:id="colField"/>
+        <Button text="start" onAction="#handleStart"/>
+    </VBox>
+
+    <VBox fx:id="waitingForBoardBox" spacing="10" style="-fx-background-color: #f0f0f0; -fx-padding: 10;"
+          AnchorPane.topAnchor="150.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" visible="false" managed="false">
+        <Label text="waiting for your rival to choose board size..."/>
     </VBox>
 
 </AnchorPane>

@@ -1,6 +1,7 @@
 module org.example.assign2 {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.naming;
 
 
     opens org.assign2 to javafx.fxml;
