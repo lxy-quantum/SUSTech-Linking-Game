@@ -29,7 +29,6 @@ public class BeginningService implements Runnable {
 
     @Override
     public void run() {
-        boolean stop = false;
         while (true) {
             if (!in.hasNext()) return;
             String command = in.next();

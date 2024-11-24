@@ -83,22 +83,23 @@ public class WelcomeController {
         } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            out.println("REGISTER " + id + " " + password);
-            String response = in.readLine();
-            if (response.equals("200 OK registered")) {
-                hideNode(regInfoBox);
-                Button button = new Button("registered");
-                button.setOnAction(e -> {
-                    root.getChildren().remove(button);
-                    showNode(registerButton);
-                    showNode(loginButton);
-                });
-                root.getChildren().add(button);
-            } else {
-                Button button = new Button(response);
-                button.setOnAction(e -> root.getChildren().remove(button));
-                root.getChildren().add(button);
-            }
+            registerTask(in, out, id, password);
+//            out.println("REGISTER " + id + " " + password);
+//            String response = in.readLine();
+//            if (response.equals("200 OK registered")) {
+//                hideNode(regInfoBox);
+//                Button button = new Button("registered");
+//                button.setOnAction(e -> {
+//                    root.getChildren().remove(button);
+//                    showNode(registerButton);
+//                    showNode(loginButton);
+//                });
+//                root.getChildren().add(button);
+//            } else {
+//                Button button = new Button(response);
+//                button.setOnAction(e -> root.getChildren().remove(button));
+//                root.getChildren().add(button);
+//            }
         }
     }
 
@@ -120,22 +121,24 @@ public class WelcomeController {
         } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            out.println("LOGIN " + id + " " + password);
-            String response = in.readLine();
-            if (response.equals("200 OK logged in")) {
-                hideNode(loginInfoBox);
-                Button button = new Button("successful");
-                button.setOnAction(e -> {
-                    root.getChildren().remove(button);
-                    showNode(matchOrPickBox);
-                });
-                root.getChildren().add(button);
+            loginTask(in, out, id, password);
 
-            } else {
-                Button button = new Button("Account ID already exists!");
-                button.setOnAction(e -> root.getChildren().remove(button));
-                root.getChildren().add(button);
-            }
+//            out.println("LOGIN " + id + " " + password);
+//            String response = in.readLine();
+//            if (response.equals("200 OK logged in")) {
+//                hideNode(loginInfoBox);
+//                Button button = new Button("successful");
+//                button.setOnAction(e -> {
+//                    root.getChildren().remove(button);
+//                    showNode(matchOrPickBox);
+//                });
+//                root.getChildren().add(button);
+//
+//            } else {
+//                Button button = new Button("Account ID already exists!");
+//                button.setOnAction(e -> root.getChildren().remove(button));
+//                root.getChildren().add(button);
+//            }
         }
     }
 
@@ -149,70 +152,142 @@ public class WelcomeController {
         waitForMatching(in, out);
     }
 
-    private void waitForMatching(BufferedReader in, PrintWriter out) {
+    private void registerTask(BufferedReader in, PrintWriter out, String id, String password) {
         Task<Void> task = new Task<>() {
-
             @Override
-            protected Void call() throws IOException {
+            protected Void call() throws Exception {
+                out.println("REGISTER " + id + " " + password);
                 String response = in.readLine();
-                if (response.equals("200 OK matching")) {
-                    showNode(waitingBox);
-                    String matchingResult = in.readLine();
-                    if (matchingResult.equals("200 OK matched")) {
-                        String matchedID = in.readLine();
-                        String rowColResponse = in.readLine();
-                        hideNode(waitingBox);
-                        Button button = new Button("Matched with " + matchedID);
+                if (response.equals("200 OK registered")) {
+                    Platform.runLater(() -> {
+                        hideNode(regInfoBox);
+                        Button button = new Button("registered");
                         button.setOnAction(e -> {
                             root.getChildren().remove(button);
-                            if (rowColResponse.equals("choose row and column")) {
-                                //start picking row and cols
-                                showNode(rowColBox);
-                            } else if (rowColResponse.equals("no need to choose")) {
-                                showNode(waitingForBoardBox);
-                                try {
-                                    String boardReadyResult = in.readLine();
-                                    if (boardReadyResult.equals("board settled")) {
-                                        hideNode(waitingForBoardBox);
-                                        //receive the board
-                                        int row = Integer.parseInt(in.readLine());
-                                        int col = Integer.parseInt(in.readLine());
-                                        int[][] gameBoard = new int[row][col];
-                                        for (int i = 0; i < row; i++) {
-                                            for (int j = 0; j < col; j++) {
-                                                gameBoard[i][j] = Integer.parseInt(in.readLine());
-                                            }
-                                        }
-                                        GameController.game = new Game(gameBoard);
-                                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
-                                        Scene gameScene = new Scene(fxmlLoader.load());
-
-                                        GameController gameController = fxmlLoader.getController();
-                                        gameController.setClientSocket(clientSocket);
-                                        gameController.createGameBoard();
-
-                                        Stage stage = (Stage) root.getScene().getWindow();
-                                        stage.setTitle("Game");
-                                        stage.setScene(gameScene);
-                                    }
-                                } catch (IOException ex) {
-                                    throw new RuntimeException(ex);
-                                }
-                            } else {
-                                System.out.println("error!");
-                            }
+                            showNode(registerButton);
+                            showNode(loginButton);
                         });
                         root.getChildren().add(button);
-                    }
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        Button button = new Button(response);
+                        button.setOnAction(e -> root.getChildren().remove(button));
+                        root.getChildren().add(button);
+                    });
                 }
                 return null;
             }
-
         };
 
         new Thread(task).start();
     }
 
+    private void loginTask(BufferedReader in, PrintWriter out, String id, String password) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                out.println("LOGIN " + id + " " + password);
+                String response = in.readLine();
+                if (response.equals("200 OK logged in")) {
+                    Platform.runLater(() -> {
+                        hideNode(loginInfoBox);
+                        Button button = new Button("successful");
+                        button.setOnAction(e -> {
+                            root.getChildren().remove(button);
+                            showNode(matchOrPickBox);
+                        });
+                        root.getChildren().add(button);
+                    });
+                } else {
+                    //TODO
+                    Platform.runLater(() -> {
+                        Button button = new Button("Account ID already exists!");
+                        button.setOnAction(e -> root.getChildren().remove(button));
+                        root.getChildren().add(button);
+                    });
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
+
+    private void waitForMatching(BufferedReader in, PrintWriter out) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws IOException {
+                String response = in.readLine();
+                if (response.equals("200 OK matching")) {
+                    Platform.runLater(() -> showNode(waitingBox));
+                    String matchingResult = in.readLine();
+                    if (matchingResult.equals("200 OK matched")) {
+                        String matchedID = in.readLine();
+                        String rowColResponse = in.readLine();
+                        Platform.runLater(() -> {
+                            hideNode(waitingBox);
+                            Button button = new Button("Matched with " + matchedID);
+                            button.setOnAction(e -> {
+                                root.getChildren().remove(button);
+                                if (rowColResponse.equals("choose row and column")) {
+                                    showNode(rowColBox);
+                                } else if (rowColResponse.equals("no need to choose")) {
+                                    showNode(waitingForBoardBox);
+                                    waitForBoard(in);
+                                } else {
+                                    System.out.println("error!");
+                                }
+                            });
+                            root.getChildren().add(button);
+                        });
+                    }
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
+
+    private void waitForBoard(BufferedReader in) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws IOException {
+                String boardReadyResult = in.readLine();
+                if (boardReadyResult.equals("board settled")) {
+                    Platform.runLater(() -> hideNode(waitingForBoardBox));
+                    //receive the board
+                    int row = Integer.parseInt(in.readLine());
+                    int col = Integer.parseInt(in.readLine());
+                    int[][] gameBoard = new int[row][col];
+                    for (int i = 0; i < row; i++) {
+                        for (int j = 0; j < col; j++) {
+                            gameBoard[i][j] = Integer.parseInt(in.readLine());
+                        }
+                    }
+                    Platform.runLater(() -> {
+                        GameController.game = new Game(gameBoard);
+                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
+                        Scene gameScene = new Scene(fxmlLoader.load());
+
+                        GameController gameController = fxmlLoader.getController();
+                        gameController.setClientSocket(clientSocket);
+                        gameController.createGameBoard();
+
+                        Stage stage = (Stage) root.getScene().getWindow();
+                        stage.setTitle("Game");
+                        stage.setScene(gameScene);
+                    });
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
 
     @FXML
     public void gotoPicking() {
@@ -239,30 +314,32 @@ public class WelcomeController {
 
         out.println("SET_SIZE " + row + " " + col);
 
-        String response = in.readLine();
-        if (response.equals("board settled")) {
-            hideNode(waitingForBoardBox);
-            //receive the board
-            int responseRow = Integer.parseInt(in.readLine());
-            int responseCol = Integer.parseInt(in.readLine());
-            int[][] gameBoard = new int[responseRow][responseCol];
-            for (int i = 0; i < responseRow; i++) {
-                for (int j = 0; j < responseCol; j++) {
-                    gameBoard[i][j] = Integer.parseInt(in.readLine());
-                }
-            }
-            GameController.game = new Game(gameBoard);
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
-            Scene gameScene = new Scene(fxmlLoader.load());
+        waitForBoard(in);
 
-            GameController gameController = fxmlLoader.getController();
-            gameController.setClientSocket(clientSocket);
-            gameController.createGameBoard();
-
-            Stage stage = (Stage) root.getScene().getWindow();
-            stage.setTitle("Game");
-            stage.setScene(gameScene);
-        }
+//        String response = in.readLine();
+//        if (response.equals("board settled")) {
+//            hideNode(waitingForBoardBox);
+//            //receive the board
+//            int responseRow = Integer.parseInt(in.readLine());
+//            int responseCol = Integer.parseInt(in.readLine());
+//            int[][] gameBoard = new int[responseRow][responseCol];
+//            for (int i = 0; i < responseRow; i++) {
+//                for (int j = 0; j < responseCol; j++) {
+//                    gameBoard[i][j] = Integer.parseInt(in.readLine());
+//                }
+//            }
+//            GameController.game = new Game(gameBoard);
+//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
+//            Scene gameScene = new Scene(fxmlLoader.load());
+//
+//            GameController gameController = fxmlLoader.getController();
+//            gameController.setClientSocket(clientSocket);
+//            gameController.createGameBoard();
+//
+//            Stage stage = (Stage) root.getScene().getWindow();
+//            stage.setTitle("Game");
+//            stage.setScene(gameScene);
+//        }
 
 //        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
 //        Scene gameScene = new Scene(fxmlLoader.load());

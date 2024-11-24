@@ -34,7 +34,13 @@ public class MatchingService implements Runnable{
                     PrintWriter out1 = new PrintWriter(playerSocket1.getOutputStream(), true);
                     PrintWriter out2 = new PrintWriter(playerSocket2.getOutputStream(), true);
                     out1.println("200 OK matched");
+                    //
+                    System.out.println("sent");
+
                     out2.println("200 OK matched");
+                    //
+                    System.out.println("sent");
+
                     out1.println(player2);
                     out2.println(player1);
                     out1.println("choose row and column");
