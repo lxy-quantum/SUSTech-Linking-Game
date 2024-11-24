@@ -137,7 +137,7 @@ public class GameController {
         new Thread(task).start();
     }
 
-    private void rivalPlaying() {
+    protected void rivalPlaying() {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws IOException {
@@ -157,6 +157,8 @@ public class GameController {
                     else if (response.equals("the rival linked successfully")) {
                         int row = Integer.parseInt(in.readLine());
                         int col = Integer.parseInt(in.readLine());
+                        game.board[formerRow][formerCol] = 0;
+                        game.board[row][col] = 0;
                         Button button = buttons[row][col];
                         Button finalFormerButton = formerButton;
                         int finalFormerRow = formerRow;
@@ -173,21 +175,25 @@ public class GameController {
                             });
                             delay.play();
                         });
+                        myTurn = true;
                         break;
                     }
                     else if (response.equals("the rival failed")) {
                         int row = Integer.parseInt(in.readLine());
                         int col = Integer.parseInt(in.readLine());
                         Button button = buttons[row][col];
-                        Button finalFormerButton1 = formerButton;
+                        Button finalFormerButton = formerButton;
                         Platform.runLater(() -> {
+                            button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
+
                             PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
                             delay.setOnFinished(e -> {
-                                finalFormerButton1.setStyle("");
+                                finalFormerButton.setStyle("");
                                 button.setStyle("");
                             });
                             delay.play();
                         });
+                        myTurn = true;
                         break;
                     }
                 }

@@ -250,6 +250,9 @@ public class WelcomeController {
 
                         GameController gameController = fxmlLoader.getController();
                         gameController.myTurn = myTurn;
+                        if (!myTurn) {
+                            gameController.rivalPlaying();
+                        }
                         try {
                             gameController.setClientSocket(clientSocket);
                         } catch (IOException e) {

@@ -12,18 +12,16 @@ import java.util.Scanner;
 public class GameService implements Runnable {
     private final String player1, player2;
     private final Socket playerSocket1, playerSocket2;
-    private int[][] gameBoard;
     private Game game;
     private final int[] position = new int[2];
     private int score1 = 0, score2 = 0;
 
-    public GameService(String player1, String player2, Socket playerSocket1, Socket playerSocket2, int[][] gameBoard) {
+    public GameService(String player1, String player2, Socket playerSocket1, Socket playerSocket2, int[][] board) {
         this.player1 = player1;
         this.player2 = player2;
         this.playerSocket1 = playerSocket1;
         this.playerSocket2 = playerSocket2;
-        this.gameBoard = gameBoard;
-        this.game = new Game(gameBoard);
+        this.game = new Game(board);
     }
 
     @Override
@@ -55,6 +53,8 @@ public class GameService implements Runnable {
                             int col = in1.nextInt();
                             boolean change = game.judge(position[0], position[1], row, col);
                             if (change) {
+                                game.board[position[0]][position[1]] = 0;
+                                game.board[row][col] = 0;
                                 score1++;
                                 out2.println("the rival linked successfully");
                                 out2.println(row);
@@ -89,6 +89,8 @@ public class GameService implements Runnable {
                             int col = in2.nextInt();
                             boolean change = game.judge(position[0], position[1], row, col);
                             if (change) {
+                                game.board[position[0]][position[1]] = 0;
+                                game.board[row][col] = 0;
                                 score2++;
                                 out1.println("the rival linked successfully");
                                 out1.println(row);
