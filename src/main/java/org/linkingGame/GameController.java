@@ -1,6 +1,7 @@
 package org.linkingGame;
 
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -84,7 +85,7 @@ public class GameController {
     private void handleButtonPress(Button button, int row, int col) {
         System.out.println("Button pressed at: " + row + ", " + col);
         if (myTurn) {
-            button.setStyle("-fx-border-color: #ff8c00; -fx-border-width: 2px;");
+            button.setStyle("-fx-border-color: #00dc00; -fx-border-width: 2px;");
             if (position[0] == 0) {
                 position[1] = row;
                 position[2] = col;
@@ -140,16 +141,53 @@ public class GameController {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws IOException {
+                Button formerButton = null;
+                int formerRow = 0, formerCol = 0;
                 while (true) {
                     String response = in.readLine();
                     if (response.equals("the rival chose first chess")) {
+                        int row = Integer.parseInt(in.readLine());
+                        int col = Integer.parseInt(in.readLine());
+                        Button button = buttons[row][col];
+                        Platform.runLater(() -> button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;"));
+                        formerButton = button;
+                        formerRow = row;
+                        formerCol = col;
+                    }
+                    else if (response.equals("the rival linked successfully")) {
+                        int row = Integer.parseInt(in.readLine());
+                        int col = Integer.parseInt(in.readLine());
+                        Button button = buttons[row][col];
+                        Button finalFormerButton = formerButton;
+                        int finalFormerRow = formerRow;
+                        int finalFormerCol = formerCol;
+                        Platform.runLater(() -> {
+                            button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
 
-
-                    } else if (response.equals("the rival linked successfully")) {
-
+                            PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
+                            delay.setOnFinished(e -> {
+                                deleteGrid(button, row, col);
+                                deleteGrid(finalFormerButton, finalFormerRow, finalFormerCol);
+                                //TODO: change to rival's score
+                                //scoreLabel.setText(Integer.toString(score));
+                            });
+                            delay.play();
+                        });
                         break;
-                    } else if (response.equals("the rival failed")) {
-
+                    }
+                    else if (response.equals("the rival failed")) {
+                        int row = Integer.parseInt(in.readLine());
+                        int col = Integer.parseInt(in.readLine());
+                        Button button = buttons[row][col];
+                        Button finalFormerButton1 = formerButton;
+                        Platform.runLater(() -> {
+                            PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
+                            delay.setOnFinished(e -> {
+                                finalFormerButton1.setStyle("");
+                                button.setStyle("");
+                            });
+                            delay.play();
+                        });
                         break;
                     }
                 }
