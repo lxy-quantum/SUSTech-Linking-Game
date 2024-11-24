@@ -1,4 +1,4 @@
-package org.assign2;
+package org.linkingGame;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

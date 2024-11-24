@@ -1,4 +1,4 @@
-package org.assign2;
+package org.linkingGame;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -271,7 +271,12 @@ public class WelcomeController {
                     Platform.runLater(() -> {
                         GameController.game = new Game(gameBoard);
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
-                        Scene gameScene = new Scene(fxmlLoader.load());
+                        Scene gameScene;
+                        try {
+                            gameScene = new Scene(fxmlLoader.load());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
 
                         GameController gameController = fxmlLoader.getController();
                         gameController.setClientSocket(clientSocket);

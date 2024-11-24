@@ -1,4 +1,4 @@
-package org.assign2;
+package org.linkingGame;
 
 import java.io.IOException;
 import java.io.PrintWriter;

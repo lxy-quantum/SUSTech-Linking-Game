@@ -1,11 +1,11 @@
-module org.example.assign2 {
+module org.example.linkingGame {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.naming;
 
 
-    opens org.assign2 to javafx.fxml;
-    exports org.assign2;
+    opens org.linkingGame to javafx.fxml;
+    exports org.linkingGame;
     exports org.example;
     opens org.example to javafx.fxml;
 }

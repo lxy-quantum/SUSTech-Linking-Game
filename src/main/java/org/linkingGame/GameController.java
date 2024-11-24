@@ -1,4 +1,4 @@
-package org.assign2;
+package org.linkingGame;
 
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
@@ -160,17 +160,17 @@ public class GameController {
         };
     }
 
-    public static Image imageApple = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/apple.png")).toExternalForm());
-    public static Image imageMango = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/mango.png")).toExternalForm());
-    public static Image imageBlueberry = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/blueberry.png")).toExternalForm());
-    public static Image imageCherry = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/cherry.png")).toExternalForm());
-    public static Image imageGrape = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/grape.png")).toExternalForm());
-    public static Image imageCarambola = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/carambola.png")).toExternalForm());
-    public static Image imageKiwi = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/kiwi.png")).toExternalForm());
-    public static Image imageOrange = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/orange.png")).toExternalForm());
-    public static Image imagePeach = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/peach.png")).toExternalForm());
-    public static Image imagePear = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/pear.png")).toExternalForm());
-    public static Image imagePineapple = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/pineapple.png")).toExternalForm());
-    public static Image imageWatermelon = new Image(Objects.requireNonNull(Game.class.getResource("/org/assign2/watermelon.png")).toExternalForm());
+    public static Image imageApple = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/apple.png")).toExternalForm());
+    public static Image imageMango = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/mango.png")).toExternalForm());
+    public static Image imageBlueberry = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/blueberry.png")).toExternalForm());
+    public static Image imageCherry = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/cherry.png")).toExternalForm());
+    public static Image imageGrape = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/grape.png")).toExternalForm());
+    public static Image imageCarambola = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/carambola.png")).toExternalForm());
+    public static Image imageKiwi = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/kiwi.png")).toExternalForm());
+    public static Image imageOrange = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/orange.png")).toExternalForm());
+    public static Image imagePeach = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/peach.png")).toExternalForm());
+    public static Image imagePear = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/pear.png")).toExternalForm());
+    public static Image imagePineapple = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/pineapple.png")).toExternalForm());
+    public static Image imageWatermelon = new Image(Objects.requireNonNull(Game.class.getResource("/org/linkingGame/watermelon.png")).toExternalForm());
 
 }

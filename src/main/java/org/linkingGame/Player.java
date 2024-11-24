@@ -1,4 +1,4 @@
-package org.assign2;
+package org.linkingGame;
 
 public class Player {
     String ID;
