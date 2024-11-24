@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentMap;
 
@@ -41,11 +42,24 @@ public class MatchingService implements Runnable{
 
                     Scanner in1 = new Scanner(playerSocket1.getInputStream());
                     String command = in1.next();
-                    if (command.equals("BOARD_SIZE")) {
+                    if (command.equals("SET_SIZE")) {
                         int row = in1.nextInt();
                         int col = in1.nextInt();
                         //settle the board with required size
-
+                        out1.println("board settled");
+                        out1.println(row);
+                        out1.println(col);
+                        out2.println("board settled");
+                        out2.println(row);
+                        out2.println(col);
+                        Random random = new Random();
+                        for (int i = 0; i < row; i++) {
+                            for (int j = 0; j < col; j++) {
+                                int chess = random.nextInt(12);
+                                out1.println(chess);
+                                out2.println(chess);
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);

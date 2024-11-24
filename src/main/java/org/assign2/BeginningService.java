@@ -29,9 +29,10 @@ public class BeginningService implements Runnable {
 
     @Override
     public void run() {
-        String command = in.next();
         boolean stop = false;
-        while (!stop) {
+        while (true) {
+            if (!in.hasNext()) return;
+            String command = in.next();
             switch (command) {
                 case "REGISTER": {
                     String id = in.next();
@@ -48,12 +49,13 @@ public class BeginningService implements Runnable {
                 case "MATCH": {
                     onlineMatchingClients.put(clientId, socket);
                     out.println("200 OK matching");
-                    stop = true;
-                    break;
+                    return;
                 }
                 case "PICK": {
                     onlinePickingClients.add(clientId);
                     out.println("200 OK");
+                    //
+
                 }
             }
         }

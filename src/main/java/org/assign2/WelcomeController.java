@@ -1,5 +1,7 @@
 package org.assign2;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -93,7 +95,7 @@ public class WelcomeController {
                 });
                 root.getChildren().add(button);
             } else {
-                Button button = new Button("Account ID already exists!");
+                Button button = new Button(response);
                 button.setOnAction(e -> root.getChildren().remove(button));
                 root.getChildren().add(button);
             }
@@ -140,68 +142,138 @@ public class WelcomeController {
     @FXML
     public void gotoMatching() throws IOException {
         hideNode(matchOrPickBox);
-        matching();
-    }
 
-    public void matching() throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
         out.println("MATCH");
-        String response = in.readLine();
-        if (response.equals("200 OK matching")) {
-            showNode(waitingBox);
-            String matchingResult = in.readLine();
-            if (matchingResult.equals("200 OK matched")) {
-                String matchedID = in.readLine();
-                String rowColResponse = in.readLine();
-                hideNode(waitingBox);
-                Button button = new Button("Matched with " + matchedID);
-                button.setOnAction(e -> {
-                    root.getChildren().remove(button);
-                    //start picking row and cols
-                    if (rowColResponse.equals("choose row and column")) {
-                        showNode(rowColBox);
-                    } else if (rowColResponse.equals("no need to choose")) {
-                        showNode(waitingForBoardBox);
-                        try {
-                            String rowColResult = in.readLine();
-                            if (rowColResult.equals("board settled")) {
-                                hideNode(waitingForBoardBox);
-                                //receive the board
-                            }
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    } else {
-                        System.out.println("error!");
-                    }
-                });
-                root.getChildren().add(button);
-            }
-        }
+        waitForMatching(in, out);
     }
+
+    private void waitForMatching(BufferedReader in, PrintWriter out) {
+        Task<Void> task = new Task<>() {
+
+            @Override
+            protected Void call() throws IOException {
+                String response = in.readLine();
+                if (response.equals("200 OK matching")) {
+                    showNode(waitingBox);
+                    String matchingResult = in.readLine();
+                    if (matchingResult.equals("200 OK matched")) {
+                        String matchedID = in.readLine();
+                        String rowColResponse = in.readLine();
+                        hideNode(waitingBox);
+                        Button button = new Button("Matched with " + matchedID);
+                        button.setOnAction(e -> {
+                            root.getChildren().remove(button);
+                            if (rowColResponse.equals("choose row and column")) {
+                                //start picking row and cols
+                                showNode(rowColBox);
+                            } else if (rowColResponse.equals("no need to choose")) {
+                                showNode(waitingForBoardBox);
+                                try {
+                                    String boardReadyResult = in.readLine();
+                                    if (boardReadyResult.equals("board settled")) {
+                                        hideNode(waitingForBoardBox);
+                                        //receive the board
+                                        int row = Integer.parseInt(in.readLine());
+                                        int col = Integer.parseInt(in.readLine());
+                                        int[][] gameBoard = new int[row][col];
+                                        for (int i = 0; i < row; i++) {
+                                            for (int j = 0; j < col; j++) {
+                                                gameBoard[i][j] = Integer.parseInt(in.readLine());
+                                            }
+                                        }
+                                        GameController.game = new Game(gameBoard);
+                                        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
+                                        Scene gameScene = new Scene(fxmlLoader.load());
+
+                                        GameController gameController = fxmlLoader.getController();
+                                        gameController.setClientSocket(clientSocket);
+                                        gameController.createGameBoard();
+
+                                        Stage stage = (Stage) root.getScene().getWindow();
+                                        stage.setTitle("Game");
+                                        stage.setScene(gameScene);
+                                    }
+                                } catch (IOException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            } else {
+                                System.out.println("error!");
+                            }
+                        });
+                        root.getChildren().add(button);
+                    }
+                }
+                return null;
+            }
+
+        };
+
+        new Thread(task).start();
+    }
+
 
     @FXML
     public void gotoPicking() {
         hideNode(matchOrPickBox);
+
     }
 
     @FXML
     public void handleStart(ActionEvent event) throws IOException {
-        int[] size = getBoardSizeFromUser();
+//        int[] size = getBoardSizeFromUser();
+//
+//        GameController.game = new Game(Game.setUpBoard(size[0], size[1]));
+        int row, col;
+        try {
+            row = Integer.parseInt(rowField.getText());
+            col = Integer.parseInt(colField.getText());
+        } catch (NumberFormatException e) {
+            row = 5;
+            col = 5;
+        }
 
-        GameController.game = new Game(Game.setUpBoard(size[0], size[1]));
+        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
-        Scene gameScene = new Scene(fxmlLoader.load());
+        out.println("SET_SIZE " + row + " " + col);
 
-        GameController gameController = fxmlLoader.getController();
-        gameController.setClientSocket(clientSocket);
-        gameController.createGameBoard();
+        String response = in.readLine();
+        if (response.equals("board settled")) {
+            hideNode(waitingForBoardBox);
+            //receive the board
+            int responseRow = Integer.parseInt(in.readLine());
+            int responseCol = Integer.parseInt(in.readLine());
+            int[][] gameBoard = new int[responseRow][responseCol];
+            for (int i = 0; i < responseRow; i++) {
+                for (int j = 0; j < responseCol; j++) {
+                    gameBoard[i][j] = Integer.parseInt(in.readLine());
+                }
+            }
+            GameController.game = new Game(gameBoard);
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
+            Scene gameScene = new Scene(fxmlLoader.load());
 
-        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-        stage.setScene(gameScene);
-        stage.setTitle("Game");
+            GameController gameController = fxmlLoader.getController();
+            gameController.setClientSocket(clientSocket);
+            gameController.createGameBoard();
+
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setTitle("Game");
+            stage.setScene(gameScene);
+        }
+
+//        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
+//        Scene gameScene = new Scene(fxmlLoader.load());
+//
+//        GameController gameController = fxmlLoader.getController();
+//        gameController.setClientSocket(clientSocket);
+//        gameController.createGameBoard();
+//
+//        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+//        stage.setTitle("Game");
+//        stage.setScene(gameScene);
     }
 
     @FXML
@@ -236,8 +308,14 @@ public class WelcomeController {
     }
 }
 
-class MessageSender implements Runnable {
-//    private final PrintWriter out;
+class MatchingHandler implements Runnable {
+    private final BufferedReader in;
+    private final PrintWriter out;
+
+    public MatchingHandler(BufferedReader in, PrintWriter out) {
+        this.in = in;
+        this.out = out;
+    }
 
     @Override
     public void run() {
