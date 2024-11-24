@@ -26,9 +26,6 @@ public class GameServer {
                 BeginningService service = new BeginningService(socket, players, onlineMatchingClients, onlinePickingClients);
                 Thread beginningThread = new Thread(service);
                 beginningThread.start();
-//                ClientHandler clientHandler = new ClientHandler(socket, clients);
-//                clients.add(clientHandler);
-//                new Thread(clientHandler).start();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

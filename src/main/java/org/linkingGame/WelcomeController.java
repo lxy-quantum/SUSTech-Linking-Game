@@ -84,22 +84,6 @@ public class WelcomeController {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             registerTask(in, out, id, password);
-//            out.println("REGISTER " + id + " " + password);
-//            String response = in.readLine();
-//            if (response.equals("200 OK registered")) {
-//                hideNode(regInfoBox);
-//                Button button = new Button("registered");
-//                button.setOnAction(e -> {
-//                    root.getChildren().remove(button);
-//                    showNode(registerButton);
-//                    showNode(loginButton);
-//                });
-//                root.getChildren().add(button);
-//            } else {
-//                Button button = new Button(response);
-//                button.setOnAction(e -> root.getChildren().remove(button));
-//                root.getChildren().add(button);
-//            }
         }
     }
 
@@ -121,24 +105,8 @@ public class WelcomeController {
         } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            loginTask(in, out, id, password);
 
-//            out.println("LOGIN " + id + " " + password);
-//            String response = in.readLine();
-//            if (response.equals("200 OK logged in")) {
-//                hideNode(loginInfoBox);
-//                Button button = new Button("successful");
-//                button.setOnAction(e -> {
-//                    root.getChildren().remove(button);
-//                    showNode(matchOrPickBox);
-//                });
-//                root.getChildren().add(button);
-//
-//            } else {
-//                Button button = new Button("Account ID already exists!");
-//                button.setOnAction(e -> root.getChildren().remove(button));
-//                root.getChildren().add(button);
-//            }
+            loginTask(in, out, id, password);
         }
     }
 
@@ -149,6 +117,7 @@ public class WelcomeController {
         BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
         out.println("MATCH");
+
         waitForMatching(in, out);
     }
 
@@ -161,7 +130,7 @@ public class WelcomeController {
                 if (response.equals("200 OK registered")) {
                     Platform.runLater(() -> {
                         hideNode(regInfoBox);
-                        Button button = new Button("registered");
+                        Button button = new Button("registered successfully");
                         button.setOnAction(e -> {
                             root.getChildren().remove(button);
                             showNode(registerButton);
@@ -236,7 +205,7 @@ public class WelcomeController {
                                     showNode(rowColBox);
                                 } else if (rowColResponse.equals("no need to choose")) {
                                     showNode(waitingForBoardBox);
-                                    waitForBoard(in);
+                                    waitForBoard(in, true);
                                 } else {
                                     System.out.println("error!");
                                 }
@@ -252,7 +221,7 @@ public class WelcomeController {
         new Thread(task).start();
     }
 
-    private void waitForBoard(BufferedReader in) {
+    private void waitForBoard(BufferedReader in, boolean myTurn) {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws IOException {
@@ -275,11 +244,18 @@ public class WelcomeController {
                         try {
                             gameScene = new Scene(fxmlLoader.load());
                         } catch (IOException e) {
+                            //TODO: exception?
                             throw new RuntimeException(e);
                         }
 
                         GameController gameController = fxmlLoader.getController();
-                        gameController.setClientSocket(clientSocket);
+                        gameController.myTurn = myTurn;
+                        try {
+                            gameController.setClientSocket(clientSocket);
+                        } catch (IOException e) {
+                            //TODO: exception?
+                            throw new RuntimeException(e);
+                        }
                         gameController.createGameBoard();
 
                         Stage stage = (Stage) root.getScene().getWindow();
@@ -301,10 +277,7 @@ public class WelcomeController {
     }
 
     @FXML
-    public void handleStart(ActionEvent event) throws IOException {
-//        int[] size = getBoardSizeFromUser();
-//
-//        GameController.game = new Game(Game.setUpBoard(size[0], size[1]));
+    public void handleStart() throws IOException {
         int row, col;
         try {
             row = Integer.parseInt(rowField.getText());
@@ -319,43 +292,7 @@ public class WelcomeController {
 
         out.println("SET_SIZE " + row + " " + col);
 
-        waitForBoard(in);
-
-//        String response = in.readLine();
-//        if (response.equals("board settled")) {
-//            hideNode(waitingForBoardBox);
-//            //receive the board
-//            int responseRow = Integer.parseInt(in.readLine());
-//            int responseCol = Integer.parseInt(in.readLine());
-//            int[][] gameBoard = new int[responseRow][responseCol];
-//            for (int i = 0; i < responseRow; i++) {
-//                for (int j = 0; j < responseCol; j++) {
-//                    gameBoard[i][j] = Integer.parseInt(in.readLine());
-//                }
-//            }
-//            GameController.game = new Game(gameBoard);
-//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
-//            Scene gameScene = new Scene(fxmlLoader.load());
-//
-//            GameController gameController = fxmlLoader.getController();
-//            gameController.setClientSocket(clientSocket);
-//            gameController.createGameBoard();
-//
-//            Stage stage = (Stage) root.getScene().getWindow();
-//            stage.setTitle("Game");
-//            stage.setScene(gameScene);
-//        }
-
-//        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
-//        Scene gameScene = new Scene(fxmlLoader.load());
-//
-//        GameController gameController = fxmlLoader.getController();
-//        gameController.setClientSocket(clientSocket);
-//        gameController.createGameBoard();
-//
-//        Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-//        stage.setTitle("Game");
-//        stage.setScene(gameScene);
+        waitForBoard(in, false);
     }
 
     @FXML
@@ -366,19 +303,6 @@ public class WelcomeController {
         showNode(loginButton);
     }
 
-    // let user choose board size
-    private int[] getBoardSizeFromUser() {
-        int row, col;
-        try {
-            row = Integer.parseInt(rowField.getText());
-            col = Integer.parseInt(colField.getText());
-        } catch (NumberFormatException e) {
-            row = 5;
-            col = 5;
-        }
-        return new int[]{row, col};
-    }
-
     public void hideNode(Node node) {
         node.setVisible(false);
         node.setManaged(false);
@@ -387,20 +311,5 @@ public class WelcomeController {
     public void showNode(Node node) {
         node.setVisible(true);
         node.setManaged(true);
-    }
-}
-
-class MatchingHandler implements Runnable {
-    private final BufferedReader in;
-    private final PrintWriter out;
-
-    public MatchingHandler(BufferedReader in, PrintWriter out) {
-        this.in = in;
-        this.out = out;
-    }
-
-    @Override
-    public void run() {
-
     }
 }

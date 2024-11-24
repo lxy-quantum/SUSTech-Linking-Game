@@ -1,6 +1,7 @@
 package org.linkingGame;
 
 import javafx.animation.PauseTransition;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -13,6 +14,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -32,14 +37,20 @@ public class GameController {
     public static Game game;
 
     Socket clientSocket;
+    BufferedReader in;
+    PrintWriter out;
 
+    Button[][] buttons;
     int[] position = new int[3];
     Button lastButton;
 
+    protected boolean myTurn;
     int score = 0;
 
-    public void setClientSocket(Socket socket) {
+    public void setClientSocket(Socket socket) throws IOException {
         this.clientSocket = socket;
+        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        out = new PrintWriter(clientSocket.getOutputStream(), true);
     }
 
     @FXML
@@ -49,6 +60,7 @@ public class GameController {
 
     public void createGameBoard() {
         gameBoard.getChildren().clear();
+        buttons = new Button[game.row][game.col];
 
         for (int row = 0; row < game.row; row++) {
             for (int col = 0; col < game.col; col++) {
@@ -63,6 +75,7 @@ public class GameController {
                 int finalRow = row;
                 int finalCol = col;
                 button.setOnAction( _ -> handleButtonPress(button, finalRow, finalCol));
+                buttons[row][col] = button;
                 gameBoard.add(button, col, row);
             }
         }
@@ -70,43 +83,86 @@ public class GameController {
 
     private void handleButtonPress(Button button, int row, int col) {
         System.out.println("Button pressed at: " + row + ", " + col);
-        button.setStyle("-fx-border-color: #ff8c00; -fx-border-width: 2px;");
-        if (position[0] == 0) {
-            position[1] = row;
-            position[2] = col;
-            position[0] = 1;
-            lastButton = button;
-        } else {
-            position[0] = 0;
-            boolean change = game.judge(position[1], position[2], row, col);
-            if (change) {
-                //handle the grid deletion logic
-                game.board[position[1]][position[2]] = 0;
-                game.board[row][col] = 0;
-                PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
-                delay.setOnFinished(e -> {
-                    deleteGrid(button, row, col);
-                    deleteGrid(lastButton, position[1], position[2]);
-                    score++;
-                    scoreLabel.setText(Integer.toString(score));
-                });
-                delay.play();
-            }
-            else {
-                System.out.println("failed!");
-                PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
-                delay.setOnFinished(e -> {
-                    addPopup((StackPane) gameBoard.getParent());
-                    lastButton.setStyle("");
-                    button.setStyle("");
-                });
-                delay.play();
+        if (myTurn) {
+            button.setStyle("-fx-border-color: #ff8c00; -fx-border-width: 2px;");
+            if (position[0] == 0) {
+                position[1] = row;
+                position[2] = col;
+                position[0] = 1;
+                lastButton = button;
+                sendButtonInfoToServer("FIRST", row, col);
+            } else {
+                sendButtonInfoToServer("SECOND", row, col);
+                boolean change = game.judge(position[1], position[2], row, col);
+                if (change) {
+                    //handle the grid deletion logic
+                    game.board[position[1]][position[2]] = 0;
+                    game.board[row][col] = 0;
+                    PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
+                    delay.setOnFinished(e -> {
+                        deleteGrid(button, row, col);
+                        deleteGrid(lastButton, position[1], position[2]);
+                        score++;
+                        scoreLabel.setText(Integer.toString(score));
+                    });
+                    delay.play();
+                }
+                else {
+                    System.out.println("failed!");
+                    PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
+                    delay.setOnFinished(e -> {
+                        addPopup((StackPane) gameBoard.getParent());
+                        lastButton.setStyle("");
+                        button.setStyle("");
+                    });
+                    delay.play();
+                }
+                position[0] = 0;
+                myTurn = false;
+                rivalPlaying();
             }
         }
     }
 
+    private void sendButtonInfoToServer(String code, int row, int col) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
+                out.println(code + " " + row + " " + col);
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
+
+    private void rivalPlaying() {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws IOException {
+                while (true) {
+                    String response = in.readLine();
+                    if (response.equals("the rival chose first chess")) {
+
+
+                    } else if (response.equals("the rival linked successfully")) {
+
+                        break;
+                    } else if (response.equals("the rival failed")) {
+
+                        break;
+                    }
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
+
     @FXML
     private void handleReset() {
+        //TODO: update that serverside takes over
         System.out.println("Reset");
         score = 0;
         scoreLabel.setText("0");

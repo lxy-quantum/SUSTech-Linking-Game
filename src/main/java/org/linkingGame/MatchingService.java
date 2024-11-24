@@ -30,17 +30,12 @@ public class MatchingService implements Runnable{
                 Socket playerSocket1 = clientEntry1.getValue();
                 Socket playerSocket2 = clientEntry2.getValue();
 
+                int[][] board = null;
                 try {
                     PrintWriter out1 = new PrintWriter(playerSocket1.getOutputStream(), true);
                     PrintWriter out2 = new PrintWriter(playerSocket2.getOutputStream(), true);
                     out1.println("200 OK matched");
-                    //
-                    System.out.println("sent");
-
                     out2.println("200 OK matched");
-                    //
-                    System.out.println("sent");
-
                     out1.println(player2);
                     out2.println(player1);
                     out1.println("choose row and column");
@@ -58,10 +53,13 @@ public class MatchingService implements Runnable{
                         out2.println("board settled");
                         out2.println(row);
                         out2.println(col);
+
                         Random random = new Random();
+                        board = new int[row][col];
                         for (int i = 0; i < row; i++) {
                             for (int j = 0; j < col; j++) {
                                 int chess = random.nextInt(12);
+                                board[i][j] = chess;
                                 out1.println(chess);
                                 out2.println(chess);
                             }
@@ -71,7 +69,7 @@ public class MatchingService implements Runnable{
                     throw new RuntimeException(e);
                 }
 
-                Thread gameThread = new Thread(new GameService(player1, player2, playerSocket1, playerSocket2));
+                Thread gameThread = new Thread(new GameService(player1, player2, playerSocket1, playerSocket2, board));
                 gameThread.start();
             }
         }

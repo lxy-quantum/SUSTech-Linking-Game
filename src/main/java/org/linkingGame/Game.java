@@ -13,7 +13,7 @@ public class Game {
     // board content
     int[][] board;
 
-    public Game(int[][] board){
+    public Game(int[][] board) {
         this.board = board;
         this.row = board.length;
         this.col = board[0].length;
