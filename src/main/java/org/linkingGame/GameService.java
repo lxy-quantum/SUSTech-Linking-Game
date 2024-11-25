@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class GameService implements Runnable {
-    private final String player1, player2;
+    private final Player player1, player2;
     private final Socket playerSocket1, playerSocket2;
     private Game game;
     private final int[] position = new int[2];
     private int score1 = 0, score2 = 0;
 
-    public GameService(String player1, String player2, Socket playerSocket1, Socket playerSocket2, int[][] board) {
+    public GameService(Player player1, Player player2, Socket playerSocket1, Socket playerSocket2, int[][] board) {
         this.player1 = player1;
         this.player2 = player2;
         this.playerSocket1 = playerSocket1;
@@ -36,7 +36,50 @@ public class GameService implements Runnable {
 
             boolean player1Turn = false;
             while (true) {
+                if (!game.hasAnyLinkingPairs()) {
+                    if (score1 > score2) {
+                        out1.println("game ended");
+                        out1.println("you won");
+
+                        out2.println("game ended");
+                        out2.println("you lost");
+
+                        out1.println(score1);
+                        out1.println(score2);
+
+                        out2.println(score2);
+                        out2.println(score1);
+                    }
+                    else if (score1 < score2) {
+                        out1.println("game ended");
+                        out1.println("you lost");
+
+                        out2.println("game ended");
+                        out2.println("you won");
+
+                        out1.println(score1);
+                        out1.println(score2);
+
+                        out2.println(score2);
+                        out2.println(score1);
+                    }
+                    else {
+                        out1.println("game ended");
+                        out1.println("tie");
+
+                        out2.println("game ended");
+                        out2.println("tie");
+
+                        out1.println(score1);
+
+                        out2.println(score2);
+                    }
+                    //TODO: record the game
+
+                    break;
+                }
                 if (player1Turn) {
+                    out1.println("game continues");
                     if (!in1.hasNext()) return;
                     String command = in1.next();
                     switch (command) {

@@ -7,9 +7,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
 public class MatchingService implements Runnable{
+    private final ConcurrentMap<String, Player> players;
     private final ConcurrentMap<String, Socket> clientMap;
 
-    public MatchingService(ConcurrentMap<String, Socket> clientMap) {
+    public MatchingService(ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> clientMap) {
+        this.players = players;
         this.clientMap = clientMap;
     }
 
@@ -23,8 +25,8 @@ public class MatchingService implements Runnable{
                 ConcurrentMap.Entry<String, Socket> clientEntry2 = iterator.next();
                 iterator.remove();
 
-                String player1 = clientEntry1.getKey();
-                String player2 = clientEntry2.getKey();
+                String player1ID = clientEntry1.getKey();
+                String player2ID = clientEntry2.getKey();
                 Socket playerSocket1 = clientEntry1.getValue();
                 Socket playerSocket2 = clientEntry2.getValue();
 
@@ -34,8 +36,8 @@ public class MatchingService implements Runnable{
                     PrintWriter out2 = new PrintWriter(playerSocket2.getOutputStream(), true);
                     out1.println("200 OK matched");
                     out2.println("200 OK matched");
-                    out1.println(player2);
-                    out2.println(player1);
+                    out1.println(player2ID);
+                    out2.println(player1ID);
                     out1.println("choose row and column");
                     out2.println("no need to choose");
 
@@ -71,6 +73,8 @@ public class MatchingService implements Runnable{
                     throw new RuntimeException(e);
                 }
 
+                Player player1 = players.get(player1ID);
+                Player player2 = players.get(player2ID);
                 Thread gameThread = new Thread(new GameService(player1, player2, playerSocket1, playerSocket2, board));
                 gameThread.start();
             }

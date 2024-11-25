@@ -16,7 +16,7 @@ public class GameServer {
         try(ServerSocket serverSocket = new ServerSocket(1234)) {
             System.out.println("Server started ......");
 
-            Thread matchingThread = new Thread(new MatchingService(onlineMatchingClients));
+            Thread matchingThread = new Thread(new MatchingService(players, onlineMatchingClients));
             matchingThread.start();
 
             while (true) {

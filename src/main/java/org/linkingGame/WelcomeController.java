@@ -156,8 +156,6 @@ public class WelcomeController {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 out.println("LOGIN " + id + " " + password);
                 String response = in.readLine();
                 if (response.equals("200 OK logged in")) {

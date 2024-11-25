@@ -4,7 +4,9 @@ import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -13,6 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.BufferedReader;
@@ -24,10 +27,11 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class GameController {
+    @FXML
+    public VBox root;
 
     @FXML
     public Label roundReminderLabel;
-
     @FXML
     private Label myScoreLabel;
     @FXML
@@ -63,7 +67,15 @@ public class GameController {
 
     @FXML
     public void initialize() {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
 
+                return null;
+            }
+        };
+
+        new Thread(task).start();
     }
 
     public void createGameBoard() {
@@ -166,6 +178,18 @@ public class GameController {
                 int formerRow = 0, formerCol = 0;
                 while (true) {
                     String response = in.readLine();
+                    if (response.equals("game ended")) {
+                        String responseOfWinner = in.readLine();
+                        if (responseOfWinner.equals("you won")) {
+                            int myScore = Integer.parseInt(in.readLine());
+                            int rivalScore = Integer.parseInt(in.readLine());
+                        } else if (responseOfWinner.equals("you lost")) {
+
+                        } else if (responseOfWinner.equals("tie")) {
+
+                        }
+                        return null;
+                    }
                     if (response.equals("the rival chose first chess")) {
                         int row = Integer.parseInt(in.readLine());
                         int col = Integer.parseInt(in.readLine());
@@ -213,7 +237,9 @@ public class GameController {
                             });
                             delay.play();
                         });
-                        //TODO: display it's my turn
+                        //receive message from server whether the game ends
+                        receiveMessageInMyTurn();
+                        //display it's my turn
                         Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
                         myTurn = true;
                         break;
@@ -233,7 +259,9 @@ public class GameController {
                             });
                             delay.play();
                         });
-                        //TODO: display it's my turn
+                        //receive message from server whether the game ends
+                        receiveMessageInMyTurn();
+                        //display it's my turn
                         Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
                         myTurn = true;
                         break;
@@ -245,6 +273,67 @@ public class GameController {
 
         new Thread(task).start();
     }
+
+    private void receiveMessageInMyTurn() {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws IOException {
+                String response = in.readLine();
+                if (response.equals("game ended")) {
+                    String responseOfWinner = in.readLine();
+                    if (responseOfWinner.equals("you won")) {
+                        int myFinalScore = Integer.parseInt(in.readLine());
+                        int rivalFinalScore = Integer.parseInt(in.readLine());
+                        Platform.runLater(() -> endTheGame(true, false, myFinalScore, rivalFinalScore));
+                    } else if (responseOfWinner.equals("you lost")) {
+                        int myFinalScore = Integer.parseInt(in.readLine());
+                        int rivalFinalScore = Integer.parseInt(in.readLine());
+                        Platform.runLater(() -> endTheGame(false, false, myFinalScore, rivalFinalScore));
+                    } else if (responseOfWinner.equals("tie")) {
+                        int finalScore = Integer.parseInt(in.readLine());
+                        Platform.runLater(() -> endTheGame(false, true, finalScore, finalScore));
+                    }
+                    return null;
+                } else if (response.equals("game continues")) {
+                    in.readLine();
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
+
+    private void endTheGame(boolean won, boolean tie, int myFinalScore, int rivalFinalScore) {
+        String info = won ? "Your Won!" : "Your Lost!";
+        info = tie ? "Tie Game!" : info;
+        Button button = new Button(info + " Your score: " + myFinalScore + " Rival Score" + rivalFinalScore);
+        button.setOnAction(event -> {
+            root.getChildren().remove(button);
+
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("welcome.fxml"));
+            Scene welcomeScene;
+            try {
+                welcomeScene = new Scene(fxmlLoader.load());
+            } catch (IOException e) {
+                //TODO: exception?
+                throw new RuntimeException(e);
+            }
+
+            WelcomeController welcomeController = fxmlLoader.getController();
+            welcomeController.setClientSocket(clientSocket);
+            welcomeController.hideNode(welcomeController.registerButton);
+            welcomeController.hideNode(welcomeController.loginButton);
+            welcomeController.showNode(welcomeController.matchOrPickBox);
+
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setTitle("Welcome");
+            stage.setScene(welcomeScene);
+        });
+        root.getChildren().add(button);
+    }
+
+
 
     @FXML
     private void handleReset() {
