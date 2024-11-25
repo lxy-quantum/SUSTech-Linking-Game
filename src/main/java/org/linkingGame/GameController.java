@@ -61,10 +61,10 @@ public class GameController {
 
     public void createGameBoard() {
         gameBoard.getChildren().clear();
-        buttons = new Button[game.row][game.col];
+        buttons = new Button[game.rowSize][game.colSize];
 
-        for (int row = 0; row < game.row; row++) {
-            for (int col = 0; col < game.col; col++) {
+        for (int row = 0; row < game.rowSize; row++) {
+            for (int col = 0; col < game.colSize; col++) {
                 Button button = new Button();
                 button.setMinSize(40, 40);
                 button.setPrefSize(40, 40);
@@ -94,11 +94,13 @@ public class GameController {
                 sendButtonInfoToServer("FIRST", row, col);
             } else {
                 sendButtonInfoToServer("SECOND", row, col);
-                boolean change = game.judge(position[1], position[2], row, col);
+                LinkingResult linkingResult = game.judge(position[1], position[2], row, col);
+                boolean change = linkingResult.success;
                 if (change) {
                     //handle the grid deletion logic
                     game.board[position[1]][position[2]] = 0;
                     game.board[row][col] = 0;
+                    //TODO: the lines
                     PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
                     delay.setOnFinished(e -> {
                         deleteGrid(button, row, col);
@@ -163,6 +165,7 @@ public class GameController {
                         Button finalFormerButton = formerButton;
                         int finalFormerRow = formerRow;
                         int finalFormerCol = formerCol;
+
                         Platform.runLater(() -> {
                             button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
 
@@ -210,7 +213,7 @@ public class GameController {
         System.out.println("Reset");
         score = 0;
         scoreLabel.setText("0");
-        game.board = Game.setUpBoard(game.row, game.col);
+        game.board = Game.setUpBoard(game.rowSize, game.colSize);
         createGameBoard();
     }
 

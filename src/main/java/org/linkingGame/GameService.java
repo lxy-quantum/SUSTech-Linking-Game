@@ -7,6 +7,8 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class GameService implements Runnable {
@@ -51,7 +53,8 @@ public class GameService implements Runnable {
                         case "SECOND": {
                             int row = in1.nextInt();
                             int col = in1.nextInt();
-                            boolean change = game.judge(position[0], position[1], row, col);
+                            LinkingResult linkingResult = game.judge(position[0], position[1], row, col);
+                            boolean change = linkingResult.success;
                             if (change) {
                                 game.board[position[0]][position[1]] = 0;
                                 game.board[row][col] = 0;
@@ -59,6 +62,7 @@ public class GameService implements Runnable {
                                 out2.println("the rival linked successfully");
                                 out2.println(row);
                                 out2.println(col);
+                                //TODO: lines
                             }
                             else {
                                 out2.println("the rival failed");
@@ -87,7 +91,8 @@ public class GameService implements Runnable {
                         case "SECOND": {
                             int row = in2.nextInt();
                             int col = in2.nextInt();
-                            boolean change = game.judge(position[0], position[1], row, col);
+                            LinkingResult linkingResult = game.judge(position[0], position[1], row, col);
+                            boolean change = linkingResult.success;
                             if (change) {
                                 game.board[position[0]][position[1]] = 0;
                                 game.board[row][col] = 0;
@@ -95,6 +100,12 @@ public class GameService implements Runnable {
                                 out1.println("the rival linked successfully");
                                 out1.println(row);
                                 out1.println(col);
+                                ArrayList<Tuple> tuples = linkingResult.tuples;
+                                out1.println(tuples.size());
+                                for (Tuple tuple : tuples) {
+                                    out1.println(tuple.row);
+                                    out1.println(tuple.col);
+                                }
                             }
                             else {
                                 out1.println("the rival failed");
