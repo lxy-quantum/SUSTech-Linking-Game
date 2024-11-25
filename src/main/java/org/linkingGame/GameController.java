@@ -125,7 +125,7 @@ public class GameController {
                         lineButtons.add(buttons[tuple.row][tuple.col]);
                     }
                     for (Button lineButton : lineButtons) {
-                        lineButton.setStyle("-fx-border-color: #0fffff; -fx-border-width: 2px;");
+                        lineButton.setStyle("-fx-border-color: #4fafff; -fx-border-width: 2px;");
                     }
 
                     PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
@@ -144,7 +144,7 @@ public class GameController {
                     System.out.println("failed!");
                     PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
                     delay.setOnFinished(e -> {
-                        addPopup((StackPane) gameBoard.getParent());
+                        addPopup((StackPane) gameBoard.getParent(), "Failed!");
                         lastButton.setStyle("");
                         button.setStyle("");
                     });
@@ -311,9 +311,17 @@ public class GameController {
     private void endTheGame(boolean won, boolean tie, int myFinalScore, int rivalFinalScore) {
         String info = won ? "Your Won!" : "Your Lost!";
         info = tie ? "Tie Game!" : info;
-        Button button = new Button(info + " Your score: " + myFinalScore + " Rival Score" + rivalFinalScore);
-        button.setOnAction(event -> {
-            root.getChildren().remove(button);
+        info = info + " Your score: " + myFinalScore + ", Rival Score: " + rivalFinalScore;
+
+        //add a popup box
+        VBox popupBox = new VBox(10);
+        popupBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #ff8c00; -fx-border-width: 2px; -fx-padding: 10;");
+        popupBox.setAlignment(Pos.CENTER);
+        popupBox.setPrefSize(20, 14);
+        Text popupText = new Text(info);
+        Button closeButton = new Button("OK");
+        closeButton.setOnAction(event -> {
+//            gamePane.getChildren().remove(popupBox);
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("welcome.fxml"));
             Scene welcomeScene;
@@ -334,7 +342,8 @@ public class GameController {
             stage.setTitle("Welcome");
             stage.setScene(welcomeScene);
         });
-        root.getChildren().add(button);
+        popupBox.getChildren().addAll(popupText, closeButton);
+        gamePane.getChildren().add(popupBox);
     }
 
 
@@ -364,13 +373,13 @@ public class GameController {
         buttons[row][col] = newButton;
     }
 
-    public void addPopup(StackPane gamePane) {
+    public void addPopup(StackPane gamePane, String Info) {
         VBox popupBox = new VBox(10);
         popupBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #ff8c00; -fx-border-width: 2px; -fx-padding: 10;");
         popupBox.setAlignment(Pos.CENTER);
         popupBox.setPrefSize(20, 14);
 
-        Text popupText = new Text("Failed!");
+        Text popupText = new Text(Info);
         Button closeButton = new Button("close");
         closeButton.setOnAction(event -> gamePane.getChildren().remove(popupBox));
         popupBox.getChildren().addAll(popupText, closeButton);

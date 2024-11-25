@@ -91,16 +91,14 @@ public class MatchingService implements Runnable{
         int[][] board = new int[row][col];
 
         List<Integer> pool = new ArrayList<>();
-        int maxNum = 12;
-        for (int i = 0; i < maxNum; i++) {
-            int pairCount = totalCells / maxNum;
-            for (int j = 0; j < pairCount; j++) {
-                pool.add(i);
-                pool.add(i);
+        while (pool.size() < totalCells) {
+            if (pool.size() == totalCells - 1) {
+                pool.add(random.nextInt(12));
+            } else {
+                int chess = random.nextInt(12);
+                pool.add(chess);
+                pool.add(chess);
             }
-        }
-        if (totalCells % 2 != 0) {
-            pool.add(random.nextInt(maxNum));
         }
         Collections.shuffle(pool);
 
@@ -110,7 +108,6 @@ public class MatchingService implements Runnable{
                 board[i][j] = boardIterator.next();
             }
         }
-
         return board;
     }
 }

@@ -34,10 +34,12 @@ public class Game {
 
     // judge the validity of an operation
     public LinkingResult judge(int row1, int col1, int row2, int col2){
+        if (board[row1][col1] == 0 || board[row2][col2] == 0) {
+            return new LinkingResult(false);
+        }
         if ((board[row1][col1] != board[row2][col2]) || (row1 == row2 && col1 == col2)) {
             return new LinkingResult(false);
         }
-
         // one line
         if (isDirectlyConnected(row1, col1, row2, col2, board)) {
             LinkingResult linkingResult = new LinkingResult(true);
@@ -62,6 +64,7 @@ public class Game {
             if(board[row1][col2] == 0 && isDirectlyConnected(row1, col1, row1, col2, board)
             && isDirectlyConnected(row1, col2, row2, col2, board)) {
                 LinkingResult linkingResult = new LinkingResult(true);
+
                 int minCol = Math.min(col1, col2);
                 int maxCol = Math.max(col1, col2);
                 for (int col = minCol + 1; col < maxCol; col++) {
@@ -78,6 +81,7 @@ public class Game {
             if(board[row2][col1] == 0 && isDirectlyConnected(row2, col2, row2, col1, board)
             && isDirectlyConnected(row2, col1, row1, col1, board)) {
                 LinkingResult linkingResult = new LinkingResult(true);
+
                 int minCol = Math.min(col1, col2);
                 int maxCol = Math.max(col1, col2);
                 for (int col = minCol + 1; col < maxCol; col++) {
@@ -100,6 +104,7 @@ public class Game {
                         isDirectlyConnected(row1, col1, row1, i, board) && isDirectlyConnected(row1, i, row2, i, board)
                         && isDirectlyConnected(row2, col2, row2, i, board)){
                     LinkingResult linkingResult = new LinkingResult(true);
+
                     int minCol = Math.min(col1, i);
                     int maxCol = Math.max(col1, i);
                     for (int col = minCol + 1; col < maxCol; col++) {
@@ -127,6 +132,7 @@ public class Game {
                         isDirectlyConnected(row1, col1, j, col1, board) && isDirectlyConnected(j, col1, j, col2, board)
                         && isDirectlyConnected(row2, col2, j, col2, board)){
                     LinkingResult linkingResult = new LinkingResult(true);
+
                     int minRow = Math.min(row1, j);
                     int maxRow = Math.max(row1, j);
                     for (int row = minRow + 1; row < maxRow; row++) {
@@ -181,14 +187,12 @@ public class Game {
             for (int col = 0; col < colSize; col++) {
                 //current row
                 for (int j = col + 1; j < colSize; j++) {
-                    boolean success = judge(row, col, row, j).success;
-                    if (success) return true;
+                    if (judge(row, col, row, j).success) return true;
                 }
                 //following rows
                 for (int i = row + 1; i < rowSize; i++) {
                     for (int j = 0; j < colSize; j++) {
-                        boolean success = judge(row, col, i, j).success;
-                        if (success) return true;
+                        if (judge(row, col, i, j).success) return true;
                     }
                 }
             }

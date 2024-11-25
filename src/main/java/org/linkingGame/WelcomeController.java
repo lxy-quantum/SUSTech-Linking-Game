@@ -286,17 +286,34 @@ public class WelcomeController {
         try {
             row = Integer.parseInt(rowField.getText());
             col = Integer.parseInt(colField.getText());
+            if (row < 3 || col < 3) {
+                Button button = new Button("size too small");
+                button.setOnAction(e -> root.getChildren().remove(button));
+                root.getChildren().add(button);
+                return;
+            }
         } catch (NumberFormatException e) {
-            row = 5;
-            col = 5;
+            Button button = new Button("invalid row or column");
+            button.setOnAction(event -> root.getChildren().remove(button));
+            root.getChildren().add(button);
+            return;
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+        int finalRow = row;
+        int finalCol = col;
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws IOException {
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-        out.println("SET_SIZE " + row + " " + col);
+                out.println("SET_SIZE " + finalRow + " " + finalCol);
 
-        waitForBoard(in, false);
+                waitForBoard(in, false);
+                return null;
+            }
+        };
+        new Thread(task).start();
     }
 
     @FXML
