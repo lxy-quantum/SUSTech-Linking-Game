@@ -251,7 +251,10 @@ public class WelcomeController {
                         GameController gameController = fxmlLoader.getController();
                         gameController.myTurn = myTurn;
                         if (!myTurn) {
+                            gameController.roundReminderLabel.setText("Rival's Round");
                             gameController.rivalPlaying();
+                        } else {
+                            gameController.roundReminderLabel.setText("Your Round");
                         }
                         try {
                             gameController.setClientSocket(clientSocket);

@@ -3,9 +3,7 @@ package org.linkingGame;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
 public class MatchingService implements Runnable{
@@ -46,7 +44,14 @@ public class MatchingService implements Runnable{
                     if (command.equals("SET_SIZE")) {
                         int row = in1.nextInt();
                         int col = in1.nextInt();
-                        //settle the board with required size
+                        //generate board and check before sending
+                        board = generateBoard(row, col);
+                        Game game = new Game(board);
+                        while (!game.hasAnyLinkingPairs()) {
+                            board = generateBoard(row, col);
+                            game = new Game(board);
+                        }
+
                         out1.println("board settled");
                         out1.println(row);
                         out1.println(col);
@@ -54,12 +59,9 @@ public class MatchingService implements Runnable{
                         out2.println(row);
                         out2.println(col);
 
-                        Random random = new Random();
-                        board = new int[row][col];
                         for (int i = 0; i < row; i++) {
                             for (int j = 0; j < col; j++) {
-                                int chess = random.nextInt(12);
-                                board[i][j] = chess;
+                                int chess = board[i][j];
                                 out1.println(chess);
                                 out2.println(chess);
                             }
@@ -73,5 +75,34 @@ public class MatchingService implements Runnable{
                 gameThread.start();
             }
         }
+    }
+
+    private int[][] generateBoard(int row, int col) {
+        int totalCells = row * col;
+        Random random = new Random();
+        int[][] board = new int[row][col];
+
+        List<Integer> pool = new ArrayList<>();
+        int maxNum = 12;
+        for (int i = 0; i < maxNum; i++) {
+            int pairCount = totalCells / maxNum;
+            for (int j = 0; j < pairCount; j++) {
+                pool.add(i);
+                pool.add(i);
+            }
+        }
+        if (totalCells % 2 != 0) {
+            pool.add(random.nextInt(maxNum));
+        }
+        Collections.shuffle(pool);
+
+        Iterator<Integer> boardIterator = pool.iterator();
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                board[i][j] = boardIterator.next();
+            }
+        }
+
+        return board;
     }
 }

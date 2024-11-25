@@ -176,4 +176,24 @@ public class Game {
         return false;
     }
 
+    public boolean hasAnyLinkingPairs() {
+        for (int row = 0; row < rowSize; row++) {
+            for (int col = 0; col < colSize; col++) {
+                //current row
+                for (int j = col + 1; j < colSize; j++) {
+                    boolean success = judge(row, col, row, j).success;
+                    if (success) return true;
+                }
+                //following rows
+                for (int i = row + 1; i < rowSize; i++) {
+                    for (int j = 0; j < colSize; j++) {
+                        boolean success = judge(row, col, i, j).success;
+                        if (success) return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 }

@@ -8,8 +8,14 @@
 <?import javafx.scene.layout.StackPane?>
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml" fx:controller="org.linkingGame.GameController">
   <HBox spacing="10" alignment="CENTER">
-    <Label text="Score: " />
-    <Label fx:id="scoreLabel" text="0" />
+    <Label fx:id="roundReminderLabel"/>
+  </HBox>
+
+  <HBox spacing="10" alignment="CENTER">
+    <Label text="Your Score: " />
+    <Label fx:id="myScoreLabel" text="0"/>
+    <Label text="Rival Score: "/>
+    <Label fx:id="rivalScoreLabel" text="0"/>
   </HBox>
 
   <StackPane fx:id="gamePane">

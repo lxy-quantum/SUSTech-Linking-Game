@@ -26,12 +26,18 @@ import java.util.Objects;
 public class GameController {
 
     @FXML
-    public StackPane gamePane;
-    @FXML
-    private GridPane gameBoard;
+    public Label roundReminderLabel;
 
     @FXML
-    private Label scoreLabel;
+    private Label myScoreLabel;
+    @FXML
+    public Label rivalScoreLabel;
+
+    @FXML
+    public StackPane gamePane;
+
+    @FXML
+    private GridPane gameBoard;
 
     @FXML
     public Button resetButton;
@@ -47,7 +53,7 @@ public class GameController {
     Button lastButton;
 
     protected boolean myTurn;
-    int score = 0;
+    int myScore, rivalScore = 0;
 
     public void setClientSocket(Socket socket) throws IOException {
         this.clientSocket = socket;
@@ -101,7 +107,6 @@ public class GameController {
                     //handle the grid deletion logic
                     game.board[position[1]][position[2]] = 0;
                     game.board[row][col] = 0;
-                    //TODO: the lines
 
                     ArrayList<Button> lineButtons = new ArrayList<>();
                     for (Tuple tuple : linkingResult.tuples) {
@@ -118,9 +123,8 @@ public class GameController {
                         for (Button lineButton : lineButtons) {
                             lineButton.setStyle("");
                         }
-                        score++;
-                        //TODO: tow scores
-                        scoreLabel.setText(Integer.toString(score));
+                        myScore++;
+                        myScoreLabel.setText(Integer.toString(myScore));
                     });
                     delay.play();
                 }
@@ -135,6 +139,7 @@ public class GameController {
                     delay.play();
                 }
                 position[0] = 0;
+                roundReminderLabel.setText("Rival's Round");
                 myTurn = false;
                 rivalPlaying();
             }
@@ -202,11 +207,14 @@ public class GameController {
                                 for (Button lineButton : lineButtons) {
                                     lineButton.setStyle("");
                                 }
-                                //TODO: change to rival's score
-                                //scoreLabel.setText(Integer.toString(score));
+                                //TODO: change rival's score
+                                rivalScore++;
+                                rivalScoreLabel.setText(Integer.toString(rivalScore));
                             });
                             delay.play();
                         });
+                        //TODO: display it's my turn
+                        Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
                         myTurn = true;
                         break;
                     }
@@ -225,6 +233,8 @@ public class GameController {
                             });
                             delay.play();
                         });
+                        //TODO: display it's my turn
+                        Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
                         myTurn = true;
                         break;
                     }
@@ -240,8 +250,8 @@ public class GameController {
     private void handleReset() {
         //TODO: update that serverside takes over
         System.out.println("Reset");
-        score = 0;
-        scoreLabel.setText("0");
+        myScore = 0;
+        myScoreLabel.setText("0");
         game.board = Game.setUpBoard(game.rowSize, game.colSize);
         createGameBoard();
     }
@@ -265,7 +275,7 @@ public class GameController {
         VBox popupBox = new VBox(10);
         popupBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #ff8c00; -fx-border-width: 2px; -fx-padding: 10;");
         popupBox.setAlignment(Pos.CENTER);
-        popupBox.setPrefSize(80, 50);
+        popupBox.setPrefSize(20, 14);
 
         Text popupText = new Text("Failed!");
         Button closeButton = new Button("close");
