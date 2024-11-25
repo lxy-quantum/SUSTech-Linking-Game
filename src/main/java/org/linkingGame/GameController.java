@@ -65,19 +65,6 @@ public class GameController {
         out = new PrintWriter(clientSocket.getOutputStream(), true);
     }
 
-    @FXML
-    public void initialize() {
-        Task<Void> task = new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-
-                return null;
-            }
-        };
-
-        new Thread(task).start();
-    }
-
     public void createGameBoard() {
         gameBoard.getChildren().clear();
         buttons = new Button[game.rowSize][game.colSize];
@@ -162,7 +149,11 @@ public class GameController {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-                out.println(code + " " + row + " " + col);
+                try {
+                    out.println(code + " " + row + " " + col);
+                } catch (Exception e) {
+                    dealWithConnLoss();
+                }
                 return null;
             }
         };
@@ -173,10 +164,120 @@ public class GameController {
     protected void rivalPlaying() {
         Task<Void> task = new Task<>() {
             @Override
-            protected Void call() throws IOException {
-                Button formerButton = null;
-                int formerRow = 0, formerCol = 0;
-                while (true) {
+            protected Void call() {
+                try {
+                    Button formerButton = null;
+                    int formerRow = 0, formerCol = 0;
+                    while (true) {
+                        String response = in.readLine();
+                        if (response.equals("game ended")) {
+                            String responseOfWinner = in.readLine();
+                            if (responseOfWinner.equals("you won")) {
+                                int myFinalScore = Integer.parseInt(in.readLine());
+                                int rivalFinalScore = Integer.parseInt(in.readLine());
+                                Platform.runLater(() -> endTheGame(true, false, myFinalScore, rivalFinalScore));
+                            } else if (responseOfWinner.equals("you lost")) {
+                                int myFinalScore = Integer.parseInt(in.readLine());
+                                int rivalFinalScore = Integer.parseInt(in.readLine());
+                                Platform.runLater(() -> endTheGame(false, false, myFinalScore, rivalFinalScore));
+                            } else if (responseOfWinner.equals("tie")) {
+                                int finalScore = Integer.parseInt(in.readLine());
+                                Platform.runLater(() -> endTheGame(false, true, finalScore, finalScore));
+                            }
+                            return null;
+                        }
+                        if (response.equals("the rival chose first chess")) {
+                            int row = Integer.parseInt(in.readLine());
+                            int col = Integer.parseInt(in.readLine());
+                            Button button = buttons[row][col];
+                            Platform.runLater(() -> button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;"));
+                            formerButton = button;
+                            formerRow = row;
+                            formerCol = col;
+                        }
+                        else if (response.equals("the rival linked successfully")) {
+                            int row = Integer.parseInt(in.readLine());
+                            int col = Integer.parseInt(in.readLine());
+                            game.board[formerRow][formerCol] = 0;
+                            game.board[row][col] = 0;
+                            Button button = buttons[row][col];
+                            Button finalFormerButton = formerButton;
+
+                            int lineSize = Integer.parseInt(in.readLine());
+                            ArrayList<Button> lineButtons = new ArrayList<>();
+                            for (int i = 0; i < lineSize; i++) {
+                                int mediaRow = Integer.parseInt(in.readLine());
+                                int mediaCol = Integer.parseInt(in.readLine());
+                                lineButtons.add(buttons[mediaRow][mediaCol]);
+                            }
+
+                            int finalFormerRow = formerRow;
+                            int finalFormerCol = formerCol;
+                            Platform.runLater(() -> {
+                                button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
+
+                                for (Button lineButton : lineButtons) {
+                                    lineButton.setStyle("-fx-border-color: #f09000; -fx-border-width: 2px;");
+                                }
+
+                                PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
+                                delay.setOnFinished(e -> {
+                                    deleteGrid(button, row, col);
+                                    deleteGrid(finalFormerButton, finalFormerRow, finalFormerCol);
+                                    for (Button lineButton : lineButtons) {
+                                        lineButton.setStyle("");
+                                    }
+                                    //TODO: change rival's score
+                                    rivalScore++;
+                                    rivalScoreLabel.setText(Integer.toString(rivalScore));
+                                });
+                                delay.play();
+                            });
+                            //receive message from server whether the game ends
+                            receiveMessageInMyTurn();
+                            //display it's my turn
+                            Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
+                            myTurn = true;
+                            break;
+                        }
+                        else if (response.equals("the rival failed")) {
+                            int row = Integer.parseInt(in.readLine());
+                            int col = Integer.parseInt(in.readLine());
+                            Button button = buttons[row][col];
+                            Button finalFormerButton = formerButton;
+                            Platform.runLater(() -> {
+                                button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
+
+                                PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
+                                delay.setOnFinished(e -> {
+                                    finalFormerButton.setStyle("");
+                                    button.setStyle("");
+                                });
+                                delay.play();
+                            });
+                            //receive message from server whether the game ends
+                            receiveMessageInMyTurn();
+                            //display it's my turn
+                            Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
+                            myTurn = true;
+                            break;
+                        }
+                    }
+                } catch (IOException e) {
+                    dealWithConnLoss();
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
+
+    private void receiveMessageInMyTurn() {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
+                try {
                     String response = in.readLine();
                     if (response.equals("game ended")) {
                         String responseOfWinner = in.readLine();
@@ -193,113 +294,11 @@ public class GameController {
                             Platform.runLater(() -> endTheGame(false, true, finalScore, finalScore));
                         }
                         return null;
+                    } else if (response.equals("game continues")) {
+                        in.readLine();
                     }
-                    if (response.equals("the rival chose first chess")) {
-                        int row = Integer.parseInt(in.readLine());
-                        int col = Integer.parseInt(in.readLine());
-                        Button button = buttons[row][col];
-                        Platform.runLater(() -> button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;"));
-                        formerButton = button;
-                        formerRow = row;
-                        formerCol = col;
-                    }
-                    else if (response.equals("the rival linked successfully")) {
-                        int row = Integer.parseInt(in.readLine());
-                        int col = Integer.parseInt(in.readLine());
-                        game.board[formerRow][formerCol] = 0;
-                        game.board[row][col] = 0;
-                        Button button = buttons[row][col];
-                        Button finalFormerButton = formerButton;
-
-                        int lineSize = Integer.parseInt(in.readLine());
-                        ArrayList<Button> lineButtons = new ArrayList<>();
-                        for (int i = 0; i < lineSize; i++) {
-                            int mediaRow = Integer.parseInt(in.readLine());
-                            int mediaCol = Integer.parseInt(in.readLine());
-                            lineButtons.add(buttons[mediaRow][mediaCol]);
-                        }
-
-                        int finalFormerRow = formerRow;
-                        int finalFormerCol = formerCol;
-                        Platform.runLater(() -> {
-                            button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
-
-                            for (Button lineButton : lineButtons) {
-                                lineButton.setStyle("-fx-border-color: #f09000; -fx-border-width: 2px;");
-                            }
-
-                            PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
-                            delay.setOnFinished(e -> {
-                                deleteGrid(button, row, col);
-                                deleteGrid(finalFormerButton, finalFormerRow, finalFormerCol);
-                                for (Button lineButton : lineButtons) {
-                                    lineButton.setStyle("");
-                                }
-                                //TODO: change rival's score
-                                rivalScore++;
-                                rivalScoreLabel.setText(Integer.toString(rivalScore));
-                            });
-                            delay.play();
-                        });
-                        //receive message from server whether the game ends
-                        receiveMessageInMyTurn();
-                        //display it's my turn
-                        Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
-                        myTurn = true;
-                        break;
-                    }
-                    else if (response.equals("the rival failed")) {
-                        int row = Integer.parseInt(in.readLine());
-                        int col = Integer.parseInt(in.readLine());
-                        Button button = buttons[row][col];
-                        Button finalFormerButton = formerButton;
-                        Platform.runLater(() -> {
-                            button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
-
-                            PauseTransition delay = new PauseTransition(Duration.seconds(0.1));
-                            delay.setOnFinished(e -> {
-                                finalFormerButton.setStyle("");
-                                button.setStyle("");
-                            });
-                            delay.play();
-                        });
-                        //receive message from server whether the game ends
-                        receiveMessageInMyTurn();
-                        //display it's my turn
-                        Platform.runLater(() -> roundReminderLabel.setText("Your Round"));
-                        myTurn = true;
-                        break;
-                    }
-                }
-                return null;
-            }
-        };
-
-        new Thread(task).start();
-    }
-
-    private void receiveMessageInMyTurn() {
-        Task<Void> task = new Task<>() {
-            @Override
-            protected Void call() throws IOException {
-                String response = in.readLine();
-                if (response.equals("game ended")) {
-                    String responseOfWinner = in.readLine();
-                    if (responseOfWinner.equals("you won")) {
-                        int myFinalScore = Integer.parseInt(in.readLine());
-                        int rivalFinalScore = Integer.parseInt(in.readLine());
-                        Platform.runLater(() -> endTheGame(true, false, myFinalScore, rivalFinalScore));
-                    } else if (responseOfWinner.equals("you lost")) {
-                        int myFinalScore = Integer.parseInt(in.readLine());
-                        int rivalFinalScore = Integer.parseInt(in.readLine());
-                        Platform.runLater(() -> endTheGame(false, false, myFinalScore, rivalFinalScore));
-                    } else if (responseOfWinner.equals("tie")) {
-                        int finalScore = Integer.parseInt(in.readLine());
-                        Platform.runLater(() -> endTheGame(false, true, finalScore, finalScore));
-                    }
-                    return null;
-                } else if (response.equals("game continues")) {
-                    in.readLine();
+                } catch (IOException e) {
+                    dealWithConnLoss();
                 }
                 return null;
             }
@@ -321,8 +320,6 @@ public class GameController {
         Text popupText = new Text(info);
         Button closeButton = new Button("OK");
         closeButton.setOnAction(event -> {
-//            gamePane.getChildren().remove(popupBox);
-
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("welcome.fxml"));
             Scene welcomeScene;
             try {
@@ -344,18 +341,6 @@ public class GameController {
         });
         popupBox.getChildren().addAll(popupText, closeButton);
         gamePane.getChildren().add(popupBox);
-    }
-
-
-
-    @FXML
-    private void handleReset() {
-        //TODO: update that serverside takes over
-        System.out.println("Reset");
-        myScore = 0;
-        myScoreLabel.setText("0");
-        game.board = Game.setUpBoard(game.rowSize, game.colSize);
-        createGameBoard();
     }
 
     public void deleteGrid(Button button, int row, int col) {
@@ -385,6 +370,15 @@ public class GameController {
         popupBox.getChildren().addAll(popupText, closeButton);
 
         gamePane.getChildren().add(popupBox);
+    }
+
+    private void dealWithConnLoss() {
+        Platform.runLater(() -> {
+            root.getChildren().clear();
+            Button button = new Button("Connection lost");
+            button.setOnAction(e -> ((Stage) root.getScene().getWindow()).close());
+            root.getChildren().add(button);
+        });
     }
 
     public ImageView addContent(int content){

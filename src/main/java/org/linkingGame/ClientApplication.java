@@ -9,11 +9,12 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class ClientApplication extends javafx.application.Application {
+    Socket clientSocket;
 
     @Override
     public void start(Stage stage) {
         try {
-            Socket clientSocket = new Socket("localhost", 1234);
+            clientSocket = new Socket("localhost", 1234);
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("welcome.fxml"));
             AnchorPane root = fxmlLoader.load();
@@ -27,11 +28,7 @@ public class ClientApplication extends javafx.application.Application {
             stage.show();
         } catch (IOException e) {
             System.out.println("Disconnected from server");
-            //
         }
-
-        // TODO: handle the game logic
-
     }
 
     public static void main(String[] args) {

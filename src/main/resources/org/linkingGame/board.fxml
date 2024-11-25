@@ -24,6 +24,6 @@
   </StackPane>
 
   <HBox spacing="10" alignment="CENTER" visible="false" managed="false">
-    <Button text="Reset" fx:id="resetButton" onAction="#handleReset"/>
+    <Button text="Reset" fx:id="resetButton"/>
   </HBox>
 </VBox>

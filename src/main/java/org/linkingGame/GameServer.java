@@ -12,7 +12,6 @@ public class GameServer {
         ConcurrentMap<String, Player> players = new ConcurrentHashMap<>();
         ConcurrentMap<String, Socket> onlineMatchingClients = new ConcurrentHashMap<>();
         ConcurrentMap<String, Socket> onlinePickingClients = new ConcurrentHashMap<>();
-//        Set<String> onlinePickingClients = ConcurrentHashMap.newKeySet();
 
         try(ServerSocket serverSocket = new ServerSocket(1234)) {
             System.out.println("Server started ......");
@@ -31,9 +30,5 @@ public class GameServer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void startNewBeginningService() {
-
     }
 }

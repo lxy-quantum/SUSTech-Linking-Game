@@ -43,9 +43,6 @@ public class GameService implements Runnable {
             boolean player1Turn = false;
             while (true) {
                 if (!game.hasAnyLinkingPairs()) {
-                    //
-                    System.out.println("END");
-
                     if (score1 > score2) {
                         out1.println("game ended");
                         out1.println("you won");
