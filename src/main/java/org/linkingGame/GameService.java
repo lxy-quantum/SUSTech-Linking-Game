@@ -1,24 +1,30 @@
 package org.linkingGame;
 
-import javafx.animation.PauseTransition;
-import javafx.scene.layout.StackPane;
-import javafx.util.Duration;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentMap;
 
 public class GameService implements Runnable {
+    private final ConcurrentMap<String, Player> players;
+    private final ConcurrentMap<String, Socket> matchingClientMap;
+    private final ConcurrentMap<String, Socket> pickingClientMap;
+
     private final Player player1, player2;
     private final Socket playerSocket1, playerSocket2;
     private Game game;
     private final int[] position = new int[2];
     private int score1 = 0, score2 = 0;
 
-    public GameService(Player player1, Player player2, Socket playerSocket1, Socket playerSocket2, int[][] board) {
+    public GameService(ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> matchingClientMap,
+                       ConcurrentMap<String, Socket> pickingClientMap, Player player1, Player player2,
+                       Socket playerSocket1, Socket playerSocket2, int[][] board) {
+        this.players = players;
+        this.matchingClientMap = matchingClientMap;
+        this.pickingClientMap = pickingClientMap;
+
         this.player1 = player1;
         this.player2 = player2;
         this.playerSocket1 = playerSocket1;
@@ -74,6 +80,13 @@ public class GameService implements Runnable {
 
                         out2.println(score2);
                     }
+                    //switch to beginning service
+                    BeginningService service1 = new BeginningService(playerSocket1, players, matchingClientMap, pickingClientMap);
+                    service1.setClientId(player1.ID);
+                    BeginningService service2 = new BeginningService(playerSocket2, players, matchingClientMap, pickingClientMap);
+                    service2.setClientId(player2.ID);
+                    new Thread(service1).start();
+                    new Thread(service2).start();
                     //TODO: record the game
 
                     break;

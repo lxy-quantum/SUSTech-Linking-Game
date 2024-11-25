@@ -181,12 +181,16 @@ public class GameController {
                     if (response.equals("game ended")) {
                         String responseOfWinner = in.readLine();
                         if (responseOfWinner.equals("you won")) {
-                            int myScore = Integer.parseInt(in.readLine());
-                            int rivalScore = Integer.parseInt(in.readLine());
+                            int myFinalScore = Integer.parseInt(in.readLine());
+                            int rivalFinalScore = Integer.parseInt(in.readLine());
+                            Platform.runLater(() -> endTheGame(true, false, myFinalScore, rivalFinalScore));
                         } else if (responseOfWinner.equals("you lost")) {
-
+                            int myFinalScore = Integer.parseInt(in.readLine());
+                            int rivalFinalScore = Integer.parseInt(in.readLine());
+                            Platform.runLater(() -> endTheGame(false, false, myFinalScore, rivalFinalScore));
                         } else if (responseOfWinner.equals("tie")) {
-
+                            int finalScore = Integer.parseInt(in.readLine());
+                            Platform.runLater(() -> endTheGame(false, true, finalScore, finalScore));
                         }
                         return null;
                     }

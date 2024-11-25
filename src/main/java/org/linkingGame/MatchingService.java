@@ -8,18 +8,21 @@ import java.util.concurrent.ConcurrentMap;
 
 public class MatchingService implements Runnable{
     private final ConcurrentMap<String, Player> players;
-    private final ConcurrentMap<String, Socket> clientMap;
+    private final ConcurrentMap<String, Socket> matchingClientMap;
+    private final ConcurrentMap<String, Socket> pickingClientMap;
 
-    public MatchingService(ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> clientMap) {
+    public MatchingService(ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> matchingClientMap,
+                           ConcurrentMap<String, Socket> pickingClientMap) {
         this.players = players;
-        this.clientMap = clientMap;
+        this.matchingClientMap = matchingClientMap;
+        this.pickingClientMap = pickingClientMap;
     }
 
     @Override
     public void run() {
         while (true) {
-            while (clientMap.size() > 1) {
-                Iterator<ConcurrentMap.Entry<String, Socket>> iterator = clientMap.entrySet().iterator();
+            while (matchingClientMap.size() > 1) {
+                Iterator<ConcurrentMap.Entry<String, Socket>> iterator = matchingClientMap.entrySet().iterator();
                 ConcurrentMap.Entry<String, Socket> clientEntry1 = iterator.next();
                 iterator.remove();
                 ConcurrentMap.Entry<String, Socket> clientEntry2 = iterator.next();
@@ -75,7 +78,8 @@ public class MatchingService implements Runnable{
 
                 Player player1 = players.get(player1ID);
                 Player player2 = players.get(player2ID);
-                Thread gameThread = new Thread(new GameService(player1, player2, playerSocket1, playerSocket2, board));
+                Thread gameThread = new Thread(new GameService(players, matchingClientMap, pickingClientMap,
+                        player1, player2, playerSocket1, playerSocket2, board));
                 gameThread.start();
             }
         }

@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 public class BeginningService implements Runnable {
@@ -14,11 +13,11 @@ public class BeginningService implements Runnable {
     private final PrintWriter out;
     private final ConcurrentMap<String, Player> players;
     private final ConcurrentMap<String, Socket> onlineMatchingClients;
-    private final Set<String> onlinePickingClients;
+    private final ConcurrentMap<String, Socket> onlinePickingClients;
     private String clientId;
 
     public BeginningService(Socket socket, ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> onlineMatchingClients,
-                            Set<String> onlinePickingClients) throws IOException {
+                            ConcurrentMap<String, Socket> onlinePickingClients) throws IOException {
         this.socket = socket;
         this.players = players;
         this.onlineMatchingClients = onlineMatchingClients;
@@ -51,7 +50,7 @@ public class BeginningService implements Runnable {
                     return;
                 }
                 case "PICK": {
-                    onlinePickingClients.add(clientId);
+                    onlinePickingClients.put(clientId, socket);
                     out.println("200 OK");
                     //
 
@@ -80,5 +79,9 @@ public class BeginningService implements Runnable {
         }
         clientId = id;
         out.println("200 OK logged in");
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 }
