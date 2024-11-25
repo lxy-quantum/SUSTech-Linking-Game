@@ -62,7 +62,12 @@ public class GameService implements Runnable {
                                 out2.println("the rival linked successfully");
                                 out2.println(row);
                                 out2.println(col);
-                                //TODO: lines
+                                ArrayList<Tuple> tuples = linkingResult.tuples;
+                                out2.println(tuples.size());
+                                for (Tuple tuple : tuples) {
+                                    out2.println(tuple.row);
+                                    out2.println(tuple.col);
+                                }
                             }
                             else {
                                 out2.println("the rival failed");

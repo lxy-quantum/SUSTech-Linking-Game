@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class GameController {
@@ -85,7 +86,7 @@ public class GameController {
     private void handleButtonPress(Button button, int row, int col) {
         System.out.println("Button pressed at: " + row + ", " + col);
         if (myTurn) {
-            button.setStyle("-fx-border-color: #00dc00; -fx-border-width: 2px;");
+            button.setStyle("-fx-border-color: #00ef00; -fx-border-width: 2px;");
             if (position[0] == 0) {
                 position[1] = row;
                 position[2] = col;
@@ -101,11 +102,24 @@ public class GameController {
                     game.board[position[1]][position[2]] = 0;
                     game.board[row][col] = 0;
                     //TODO: the lines
+
+                    ArrayList<Button> lineButtons = new ArrayList<>();
+                    for (Tuple tuple : linkingResult.tuples) {
+                        lineButtons.add(buttons[tuple.row][tuple.col]);
+                    }
+                    for (Button lineButton : lineButtons) {
+                        lineButton.setStyle("-fx-border-color: #0fffff; -fx-border-width: 2px;");
+                    }
+
                     PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
                     delay.setOnFinished(e -> {
                         deleteGrid(button, row, col);
                         deleteGrid(lastButton, position[1], position[2]);
+                        for (Button lineButton : lineButtons) {
+                            lineButton.setStyle("");
+                        }
                         score++;
+                        //TODO: tow scores
                         scoreLabel.setText(Integer.toString(score));
                     });
                     delay.play();
@@ -163,16 +177,31 @@ public class GameController {
                         game.board[row][col] = 0;
                         Button button = buttons[row][col];
                         Button finalFormerButton = formerButton;
+
+                        int lineSize = Integer.parseInt(in.readLine());
+                        ArrayList<Button> lineButtons = new ArrayList<>();
+                        for (int i = 0; i < lineSize; i++) {
+                            int mediaRow = Integer.parseInt(in.readLine());
+                            int mediaCol = Integer.parseInt(in.readLine());
+                            lineButtons.add(buttons[mediaRow][mediaCol]);
+                        }
+
                         int finalFormerRow = formerRow;
                         int finalFormerCol = formerCol;
-
                         Platform.runLater(() -> {
                             button.setStyle("-fx-border-color: #f00000; -fx-border-width: 2px;");
+
+                            for (Button lineButton : lineButtons) {
+                                lineButton.setStyle("-fx-border-color: #f09000; -fx-border-width: 2px;");
+                            }
 
                             PauseTransition delay = new PauseTransition(Duration.seconds(0.3));
                             delay.setOnFinished(e -> {
                                 deleteGrid(button, row, col);
                                 deleteGrid(finalFormerButton, finalFormerRow, finalFormerCol);
+                                for (Button lineButton : lineButtons) {
+                                    lineButton.setStyle("");
+                                }
                                 //TODO: change to rival's score
                                 //scoreLabel.setText(Integer.toString(score));
                             });
@@ -229,6 +258,7 @@ public class GameController {
         newButton.setGraphic(imageView);
         newButton.setOnAction( _ -> handleButtonPress(button, row, col));
         gameBoard.add(newButton, col, row);
+        buttons[row][col] = newButton;
     }
 
     public void addPopup(StackPane gamePane) {
