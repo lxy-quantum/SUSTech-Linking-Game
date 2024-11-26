@@ -3,14 +3,15 @@ package org.linkingGame;
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class MatchingService implements Runnable{
-    private final ConcurrentMap<String, Player> players;
+    private final ConcurrentHashMap<String, Player> players;
     private final ConcurrentMap<String, Socket> matchingClientMap;
     private final ConcurrentMap<String, Socket> pickingClientMap;
 
-    public MatchingService(ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> matchingClientMap,
+    public MatchingService(ConcurrentHashMap<String, Player> players, ConcurrentMap<String, Socket> matchingClientMap,
                            ConcurrentMap<String, Socket> pickingClientMap) {
         this.players = players;
         this.matchingClientMap = matchingClientMap;

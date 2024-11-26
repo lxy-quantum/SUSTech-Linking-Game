@@ -4,18 +4,19 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class BeginningService implements Runnable {
     private final Socket socket;
     private final Scanner in;
     private final PrintWriter out;
-    private final ConcurrentMap<String, Player> players;
+    private final ConcurrentHashMap<String, Player> players;
     private final ConcurrentMap<String, Socket> onlineMatchingClients;
     private final ConcurrentMap<String, Socket> onlinePickingClients;
     private String clientId = null;
 
-    public BeginningService(Socket socket, ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> onlineMatchingClients,
+    public BeginningService(Socket socket, ConcurrentHashMap<String, Player> players, ConcurrentMap<String, Socket> onlineMatchingClients,
                             ConcurrentMap<String, Socket> onlinePickingClients) throws IOException {
         this.socket = socket;
         this.players = players;

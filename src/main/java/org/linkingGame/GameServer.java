@@ -10,11 +10,13 @@ import java.util.concurrent.ConcurrentMap;
 
 public class GameServer {
     public static void main(String[] args) {
-        ConcurrentMap<String, Player> players;
+        ConcurrentHashMap<String, Player> players;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("players.ser"))) {
-            players = (ConcurrentMap<String, Player>) ois.readObject();
+            players = (ConcurrentHashMap<String, Player>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
             players = new ConcurrentHashMap<>();
+            System.out.println("cannot load players data!");
         }
 
         ConcurrentMap<String, Socket> onlineMatchingClients = new ConcurrentHashMap<>();

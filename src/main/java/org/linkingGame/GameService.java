@@ -4,12 +4,13 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GameService implements Runnable {
-    private final ConcurrentMap<String, Player> players;
+    private final ConcurrentHashMap<String, Player> players;
     private final ConcurrentMap<String, Socket> matchingClientMap;
     private final ConcurrentMap<String, Socket> pickingClientMap;
 
@@ -21,7 +22,7 @@ public class GameService implements Runnable {
     private final int[] position = new int[2];
     private int score1 = 0, score2 = 0;
 
-    public GameService(ConcurrentMap<String, Player> players, ConcurrentMap<String, Socket> matchingClientMap,
+    public GameService(ConcurrentHashMap<String, Player> players, ConcurrentMap<String, Socket> matchingClientMap,
                        ConcurrentMap<String, Socket> pickingClientMap, Player player1, Player player2,
                        Socket playerSocket1, Socket playerSocket2, int[][] board) {
         this.players = players;
