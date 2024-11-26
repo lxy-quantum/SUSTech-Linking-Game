@@ -1,6 +1,7 @@
 package org.linkingGame;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -181,20 +182,27 @@ public class GameService implements Runnable {
                 }
             }
         } catch (Exception e) {
-            System.out.println("detected");
             try {
-                PrintStream out1 = new PrintStream(playerSocket1.getOutputStream(), true);
-                out1.println("LOST RIVAL");
-                System.out.println("case1");
+                //assume player2 lost
+                OutputStream out1 = playerSocket1.getOutputStream();
+                out1.write("LOST RIVAL\n".getBytes());
+                out1.flush();
+                //switch to beginning service for player1
+                BeginningService service = new BeginningService(playerSocket1, players, matchingClientMap, pickingClientMap);
+                service.setClientId(player1.ID);
+                new Thread(service).start();
             } catch (IOException ex) {
                 try {
                     //lost player1
-                    PrintStream out2 = new PrintStream(playerSocket2.getOutputStream(), true);
-                    out2.println("LOST RIVAL");
-                    System.out.println("case2");
+                    OutputStream out2 = playerSocket2.getOutputStream();
+                    out2.write("LOST RIVAL\n".getBytes());
+                    out2.flush();
+                    //switch to beginning service for player2
+                    BeginningService service = new BeginningService(playerSocket2, players, matchingClientMap, pickingClientMap);
+                    service.setClientId(player2.ID);
+                    new Thread(service).start();
                 } catch (IOException exception) {
                     //both clients are lost
-                    System.out.println("case3");
                     throw new RuntimeException(exception);
                 }
             }
