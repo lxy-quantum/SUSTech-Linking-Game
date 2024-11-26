@@ -2,7 +2,6 @@ package org.linkingGame;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -207,16 +206,13 @@ public class WelcomeController {
             @Override
             protected Void call() {
                 try {
-                    String response = in.readLine();
-                    if (response.equals("200 OK matching")) {
-                        Platform.runLater(() -> showNode(waitingBox));
-                        String matchingResult = in.readLine();
-                        while (matchingResult.equals("LOST THE OTHER PARTY")) {
-                            matchingResult = in.readLine();
-                        }
-                        if (matchingResult.equals("200 OK matched")) {
-                            handleMatchedSituation(in);
-                        }
+                    Platform.runLater(() -> showNode(waitingBox));
+                    String matchingResult = in.readLine();
+                    while (matchingResult.equals("LOST THE OTHER PARTY")) {
+                        matchingResult = in.readLine();
+                    }
+                    if (matchingResult.equals("200 OK matched")) {
+                        handleMatched(in);
                     }
                 } catch (IOException e) {
                     dealWithConnLoss();
@@ -228,13 +224,13 @@ public class WelcomeController {
         new Thread(task).start();
     }
 
-    private void handleMatchedSituation(BufferedReader in) throws IOException {
+    private void handleMatched(BufferedReader in) throws IOException {
         String matchedID = in.readLine();
         while (matchedID.equals("LOST THE OTHER PARTY")) {
             matchedID = in.readLine();
         }
         if (matchedID.equals("200 OK matched")) {
-            handleMatchedSituation(in);
+            handleMatched(in);
             return;
         }
 
@@ -243,7 +239,7 @@ public class WelcomeController {
             rowColResponse = in.readLine();
         }
         if (rowColResponse.equals("200 OK matched")) {
-            handleMatchedSituation(in);
+            handleMatched(in);
             return;
         }
 
@@ -274,34 +270,38 @@ public class WelcomeController {
                 try {
                     String boardReadyResult = in.readLine();
                     if (boardReadyResult.equals("LOST THE OTHER PARTY")) {
-                        Platform.runLater(() -> {
-                            hideNode(waitingForBoardBox);
-                            Button button = new Button("The other party quit. Start matching again.");
-                            button.setOnAction(e -> {
-                                root.getChildren().remove(button);
-                                showNode(waitingBox);
-                            });
-                            root.getChildren().add(button);
-                        });
-
-                        while (boardReadyResult.equals("LOST THE OTHER PARTY")) {
-                            boardReadyResult = in.readLine();
-                        }
-                        if (boardReadyResult.equals("200 OK matched")) {
-                            handleMatchedSituation(in);
-                        }
+                        handleMatchedRivalLost(in, boardReadyResult);
+                        return null;
                     }
                     if (boardReadyResult.equals("board settled")) {
                         Platform.runLater(() -> hideNode(waitingForBoardBox));
                         //receive the board
-                        int row = Integer.parseInt(in.readLine());
-                        int col = Integer.parseInt(in.readLine());
+                        String rowStr = in.readLine();
+                        if (rowStr.equals("LOST THE OTHER PARTY")) {
+                            handleMatchedRivalLost(in, rowStr);
+                            return null;
+                        }
+                        int row = Integer.parseInt(rowStr);
+
+                        String colStr = in.readLine();
+                        if (colStr.equals("LOST THE OTHER PARTY")) {
+                            handleMatchedRivalLost(in, colStr);
+                            return null;
+                        }
+                        int col = Integer.parseInt(colStr);
+
                         int[][] gameBoard = new int[row][col];
                         for (int i = 0; i < row; i++) {
                             for (int j = 0; j < col; j++) {
-                                gameBoard[i][j] = Integer.parseInt(in.readLine());
+                                String chessStr = in.readLine();
+                                if (chessStr.equals("LOST THE OTHER PARTY")) {
+                                    handleMatchedRivalLost(in, chessStr);
+                                    return null;
+                                }
+                                gameBoard[i][j] = Integer.parseInt(chessStr);
                             }
                         }
+
                         Platform.runLater(() -> {
                             GameController.game = new Game(gameBoard);
                             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("board.fxml"));
@@ -334,6 +334,35 @@ public class WelcomeController {
                     }
                 } catch (IOException e) {
                     dealWithConnLoss();
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
+    }
+
+    private void handleMatchedRivalLost(BufferedReader in, String response) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws IOException {
+                Platform.runLater(() -> {
+                    hideNode(rowColBox);
+                    hideNode(waitingForBoardBox);
+                    Button button = new Button("The other party quit. Start matching again.");
+                    button.setOnAction(e -> {
+                        root.getChildren().remove(button);
+                        showNode(waitingBox);
+                    });
+                    root.getChildren().add(button);
+                });
+
+                String finalResponse = response;
+                while (finalResponse.equals("LOST THE OTHER PARTY")) {
+                    finalResponse = in.readLine();
+                }
+                if (finalResponse.equals("200 OK matched")) {
+                    handleMatched(in);
                 }
                 return null;
             }

@@ -34,7 +34,7 @@ public class MatchingService implements Runnable{
                 Socket playerSocket1 = clientEntry1.getValue();
                 Socket playerSocket2 = clientEntry2.getValue();
 
-                int[][] board = null;
+                int[][] board;
                 try {
                     OutputStream out1 = playerSocket1.getOutputStream();
                     OutputStream out2 = playerSocket2.getOutputStream();
@@ -86,8 +86,14 @@ public class MatchingService implements Runnable{
                                 out2.flush();
                             }
                         }
+
+                        Player player1 = players.get(player1ID);
+                        Player player2 = players.get(player2ID);
+                        Thread gameThread = new Thread(new GameService(players, matchingClientMap, pickingClientMap,
+                                player1, player2, playerSocket1, playerSocket2, board));
+                        gameThread.start();
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     try {
                         //assume player2 lost
                         OutputStream out1 = playerSocket1.getOutputStream();
@@ -112,12 +118,6 @@ public class MatchingService implements Runnable{
                         }
                     }
                 }
-
-                Player player1 = players.get(player1ID);
-                Player player2 = players.get(player2ID);
-                Thread gameThread = new Thread(new GameService(players, matchingClientMap, pickingClientMap,
-                        player1, player2, playerSocket1, playerSocket2, board));
-                gameThread.start();
             }
         }
     }

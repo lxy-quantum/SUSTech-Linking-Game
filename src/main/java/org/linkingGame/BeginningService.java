@@ -46,7 +46,6 @@ public class BeginningService implements Runnable {
                     }
                     case "MATCH": {
                         onlineMatchingClients.put(clientId, socket);
-                        out.println("200 OK matching");
                         return;
                     }
                     case "PICK": {
