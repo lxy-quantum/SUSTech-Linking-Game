@@ -204,6 +204,12 @@ public class GameService implements Runnable {
                 out1.flush();
                 //confirm player2 lost
                 player2.setLoggedOut();
+                //save the logged-out info
+                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                    oos.writeObject(players);
+                } catch (IOException ioe) {
+                    e.printStackTrace();
+                }
                 //switch to beginning service for player1
                 BeginningService service = new BeginningService(playerSocket1, players, matchingClientMap, pickingClientMap);
                 service.setClientId(player1.ID);
@@ -212,6 +218,12 @@ public class GameService implements Runnable {
                 try {
                     //lost player1
                     player1.setLoggedOut();
+                    //save the logged-out info
+                    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                        oos.writeObject(players);
+                    } catch (IOException ioe) {
+                        e.printStackTrace();
+                    }
                     OutputStream out2 = playerSocket2.getOutputStream();
                     out2.write("LOST RIVAL\n".getBytes());
                     out2.flush();
@@ -222,6 +234,12 @@ public class GameService implements Runnable {
                 } catch (IOException exception) {
                     //both clients are lost
                     player2.setLoggedOut();
+                    //save the logged-out info
+                    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                        oos.writeObject(players);
+                    } catch (IOException ioe) {
+                        e.printStackTrace();
+                    }
                     //log the exception
                     logger.log(Level.SEVERE, "both clients are lost from connection: ", exception);
                 }

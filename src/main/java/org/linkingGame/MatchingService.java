@@ -1,8 +1,6 @@
 package org.linkingGame;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -101,12 +99,24 @@ public class MatchingService implements Runnable{
                         out1.flush();
                         //confirm player2 lost
                         players.get(player2ID).setLoggedOut();
+                        //save the logged-out info
+                        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                            oos.writeObject(players);
+                        } catch (IOException ioe) {
+                            e.printStackTrace();
+                        }
                         //put player1 back to waiting queue
                         matchingClientMap.put(player1ID, playerSocket1);
                     } catch (IOException ex) {
                         try {
                             //player1 lost
                             players.get(player1ID).setLoggedOut();
+                            //save the logged-out info
+                            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                                oos.writeObject(players);
+                            } catch (IOException ioe) {
+                                e.printStackTrace();
+                            }
                             OutputStream out2 = playerSocket2.getOutputStream();
                             out2.write("LOST THE OTHER PARTY\n".getBytes());
                             out2.flush();
@@ -115,6 +125,12 @@ public class MatchingService implements Runnable{
                         } catch (IOException exception) {
                             //both players are lost
                             players.get(player2ID).setLoggedOut();
+                            //save the logged-out info
+                            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                                oos.writeObject(players);
+                            } catch (IOException ioe) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }

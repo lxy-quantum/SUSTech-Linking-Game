@@ -73,6 +73,12 @@ public class BeginningService implements Runnable {
             } catch (Exception e) {
                 if (clientId != null) {
                     players.get(clientId).setLoggedOut();
+                    //save the logged-out info
+                    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                        oos.writeObject(players);
+                    } catch (IOException ioe) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
