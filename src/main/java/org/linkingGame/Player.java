@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Player implements Serializable {
-    static class GameRecord {
+    static class GameRecord implements Serializable {
         String rivalID;
         boolean won;
         boolean tie;

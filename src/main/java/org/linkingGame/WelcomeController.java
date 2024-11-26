@@ -390,17 +390,18 @@ public class WelcomeController {
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                     out.println("GET_RECORD");
-                    StringBuilder recordsSb = new StringBuilder("Game with: ");
+                    StringBuilder recordsSb = new StringBuilder();
                     int recordsNum = Integer.parseInt(in.readLine());
                     for (int i = 0; i < recordsNum; i++) {
                         String rivalName = in.readLine();
+                        recordsSb.append("Game with: ");
                         recordsSb.append(rivalName);
                         recordsSb.append(", Result: ");
                         recordsSb.append(in.readLine());
                         recordsSb.append(", Your score: ");
                         recordsSb.append(in.readLine());
                         recordsSb.append(", ").append(rivalName).append("'s score: ");
-                        recordsSb.append(in.readLine()).append("\n").append("Game with: ");
+                        recordsSb.append(in.readLine()).append("\n");
                     }
                     String records = recordsSb.toString();
                     Platform.runLater(() -> addPopup(root, records));
