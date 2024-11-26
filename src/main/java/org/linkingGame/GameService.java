@@ -1,17 +1,19 @@
 package org.linkingGame;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GameService implements Runnable {
     private final ConcurrentMap<String, Player> players;
     private final ConcurrentMap<String, Socket> matchingClientMap;
     private final ConcurrentMap<String, Socket> pickingClientMap;
+
+    private static final Logger logger = Logger.getLogger(GameService.class.getName());
 
     private final Player player1, player2;
     private final Socket playerSocket1, playerSocket2;
@@ -45,6 +47,9 @@ public class GameService implements Runnable {
             while (true) {
                 if (!game.hasAnyLinkingPairs()) {
                     if (score1 > score2) {
+                        player1.addGameRecord(player2.ID, true, false, score1, score2);
+                        player2.addGameRecord(player1.ID, false, false, score2, score1);
+
                         out1.println("game ended");
                         out1.println("you won");
 
@@ -58,6 +63,9 @@ public class GameService implements Runnable {
                         out2.println(score1);
                     }
                     else if (score1 < score2) {
+                        player1.addGameRecord(player2.ID, false, false, score1, score2);
+                        player2.addGameRecord(player1.ID, true, false, score2, score1);
+
                         out1.println("game ended");
                         out1.println("you lost");
 
@@ -71,6 +79,9 @@ public class GameService implements Runnable {
                         out2.println(score1);
                     }
                     else {
+                        player1.addGameRecord(player2.ID, false, true, score1, score2);
+                        player2.addGameRecord(player1.ID, false, true, score2, score1);
+
                         out1.println("game ended");
                         out1.println("tie");
 
@@ -88,8 +99,12 @@ public class GameService implements Runnable {
                     service2.setClientId(player2.ID);
                     new Thread(service1).start();
                     new Thread(service2).start();
-                    //TODO: record the game
-
+                    //save the players game record
+                    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                        oos.writeObject(players);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 }
                 if (player1Turn) {
@@ -207,6 +222,8 @@ public class GameService implements Runnable {
                 } catch (IOException exception) {
                     //both clients are lost
                     player2.setLoggedOut();
+                    //log the exception
+                    logger.log(Level.SEVERE, "both clients are lost from connection: ", exception);
                 }
             }
         }

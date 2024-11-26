@@ -1,6 +1,8 @@
 package org.linkingGame;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,7 +10,13 @@ import java.util.concurrent.ConcurrentMap;
 
 public class GameServer {
     public static void main(String[] args) {
-        ConcurrentMap<String, Player> players = new ConcurrentHashMap<>();
+        ConcurrentMap<String, Player> players;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("players.ser"))) {
+            players = (ConcurrentMap<String, Player>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            players = new ConcurrentHashMap<>();
+        }
+
         ConcurrentMap<String, Socket> onlineMatchingClients = new ConcurrentHashMap<>();
         ConcurrentMap<String, Socket> onlinePickingClients = new ConcurrentHashMap<>();
 

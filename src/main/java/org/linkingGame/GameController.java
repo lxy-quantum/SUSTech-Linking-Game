@@ -396,13 +396,13 @@ public class GameController {
         buttons[row][col] = newButton;
     }
 
-    public void addPopup(StackPane gamePane, String Info) {
+    public void addPopup(StackPane gamePane, String info) {
         VBox popupBox = new VBox(10);
         popupBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #ff8c00; -fx-border-width: 2px; -fx-padding: 10;");
         popupBox.setAlignment(Pos.CENTER);
         popupBox.setPrefSize(20, 14);
 
-        Text popupText = new Text(Info);
+        Text popupText = new Text(info);
         Button closeButton = new Button("close");
         closeButton.setOnAction(event -> gamePane.getChildren().remove(popupBox));
         popupBox.getChildren().addAll(popupText, closeButton);

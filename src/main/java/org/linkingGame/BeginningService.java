@@ -1,9 +1,8 @@
 package org.linkingGame;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentMap;
 
@@ -54,6 +53,22 @@ public class BeginningService implements Runnable {
                         //
 
                     }
+                    case "GET_RECORD": {
+                        ArrayList<Player.GameRecord> gameRecords = players.get(clientId).gameRecords;
+                        out.println(gameRecords.size());
+                        for (Player.GameRecord gameRecord : gameRecords) {
+                            out.println(gameRecord.rivalID);
+                            if (gameRecord.won) {
+                                out.println("won");
+                            } else if (gameRecord.tie) {
+                                out.println("tie");
+                            } else {
+                                out.println("lost");
+                            }
+                            out.println(gameRecord.myScore);
+                            out.println(gameRecord.rivalScore);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 if (clientId != null) {
@@ -69,6 +84,12 @@ public class BeginningService implements Runnable {
             return;
         }
         players.put(id, new Player(id, password));
+        //save the player info
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+            oos.writeObject(players);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         out.println("200 OK registered");
     }
 

@@ -2,15 +2,19 @@ package org.linkingGame;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -378,6 +382,38 @@ public class WelcomeController {
     }
 
     @FXML
+    public void gotoRecords() {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
+                try {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    out.println("GET_RECORD");
+                    StringBuilder recordsSb = new StringBuilder("Game with: ");
+                    int recordsNum = Integer.parseInt(in.readLine());
+                    for (int i = 0; i < recordsNum; i++) {
+                        String rivalName = in.readLine();
+                        recordsSb.append(rivalName);
+                        recordsSb.append(", Result: ");
+                        recordsSb.append(in.readLine());
+                        recordsSb.append(", Your score: ");
+                        recordsSb.append(in.readLine());
+                        recordsSb.append(", ").append(rivalName).append("'s score: ");
+                        recordsSb.append(in.readLine()).append("\n").append("Game with: ");
+                    }
+                    String records = recordsSb.toString();
+                    Platform.runLater(() -> addPopup(root, records));
+                } catch (IOException e) {
+                    dealWithConnLoss();
+                }
+                return null;
+            }
+        };
+        new Thread(task).start();
+    }
+
+    @FXML
     public void handleStart() {
         int row, col;
         try {
@@ -433,6 +469,20 @@ public class WelcomeController {
     public void showNode(Node node) {
         node.setVisible(true);
         node.setManaged(true);
+    }
+
+    public void addPopup(AnchorPane root, String info) {
+        VBox popupBox = new VBox(10);
+        popupBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #ff8c00; -fx-border-width: 2px; -fx-padding: 10;");
+        popupBox.setAlignment(Pos.CENTER);
+        popupBox.setPrefSize(20, 14);
+
+        Text popupText = new Text(info);
+        Button closeButton = new Button("close");
+        closeButton.setOnAction(event -> root.getChildren().remove(popupBox));
+        popupBox.getChildren().addAll(popupText, closeButton);
+
+        root.getChildren().add(popupBox);
     }
 
     private void dealWithConnLoss() {
