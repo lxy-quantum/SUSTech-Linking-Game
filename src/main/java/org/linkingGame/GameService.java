@@ -93,7 +93,7 @@ public class GameService implements Runnable {
                 }
                 if (player1Turn) {
                     out1.println("game continues");
-                    if (!in1.hasNext()) return;
+//                    if (!in1.hasNext()) return;
                     String command = in1.next();
                     switch (command) {
                         case "FIRST": {
@@ -137,7 +137,7 @@ public class GameService implements Runnable {
                 }
                 else {
                     out2.println("game continues");
-                    if (!in2.hasNext()) return;
+//                    if (!in2.hasNext()) return;
                     String command = in2.next();
                     switch (command) {
                         case "FIRST": {
@@ -180,8 +180,24 @@ public class GameService implements Runnable {
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            System.out.println("detected");
+            try {
+                PrintStream out1 = new PrintStream(playerSocket1.getOutputStream(), true);
+                out1.println("LOST RIVAL");
+                System.out.println("case1");
+            } catch (IOException ex) {
+                try {
+                    //lost player1
+                    PrintStream out2 = new PrintStream(playerSocket2.getOutputStream(), true);
+                    out2.println("LOST RIVAL");
+                    System.out.println("case2");
+                } catch (IOException exception) {
+                    //both clients are lost
+                    System.out.println("case3");
+                    throw new RuntimeException(exception);
+                }
+            }
         }
     }
 }

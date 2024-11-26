@@ -138,7 +138,6 @@ public class WelcomeController {
                     out.println("REGISTER " + id + " " + password);
                     response = in.readLine();
                 } catch (IOException e) {
-                    System.out.println("Connection lost");
                     dealWithConnLoss();
                 }
                 if (response.equals("200 OK registered")) {

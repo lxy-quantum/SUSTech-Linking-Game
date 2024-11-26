@@ -170,6 +170,10 @@ public class GameController {
                     int formerRow = 0, formerCol = 0;
                     while (true) {
                         String response = in.readLine();
+                        if (response.equals("LOST RIVAL")) {
+                            Platform.runLater(() -> endGameWhenRivalLost());
+                            return null;
+                        }
                         if (response.equals("game ended")) {
                             String responseOfWinner = in.readLine();
                             if (responseOfWinner.equals("you won")) {
@@ -227,7 +231,7 @@ public class GameController {
                                     for (Button lineButton : lineButtons) {
                                         lineButton.setStyle("");
                                     }
-                                    //TODO: change rival's score
+                                    //change rival's score
                                     rivalScore++;
                                     rivalScoreLabel.setText(Integer.toString(rivalScore));
                                 });
@@ -279,6 +283,10 @@ public class GameController {
             protected Void call() {
                 try {
                     String response = in.readLine();
+                    if (response.equals("LOST RIVAL")) {
+                        Platform.runLater(() -> endGameWhenRivalLost());
+                        return null;
+                    }
                     if (response.equals("game ended")) {
                         String responseOfWinner = in.readLine();
                         if (responseOfWinner.equals("you won")) {
@@ -325,7 +333,37 @@ public class GameController {
             try {
                 welcomeScene = new Scene(fxmlLoader.load());
             } catch (IOException e) {
-                //TODO: exception?
+                throw new RuntimeException(e);
+            }
+
+            WelcomeController welcomeController = fxmlLoader.getController();
+            welcomeController.setClientSocket(clientSocket);
+            welcomeController.hideNode(welcomeController.registerButton);
+            welcomeController.hideNode(welcomeController.loginButton);
+            welcomeController.showNode(welcomeController.matchOrPickBox);
+
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setTitle("Welcome");
+            stage.setScene(welcomeScene);
+        });
+        popupBox.getChildren().addAll(popupText, closeButton);
+        gamePane.getChildren().add(popupBox);
+    }
+
+    private void endGameWhenRivalLost() {
+        //add a popup box
+        VBox popupBox = new VBox(10);
+        popupBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #ff8c00; -fx-border-width: 2px; -fx-padding: 10;");
+        popupBox.setAlignment(Pos.CENTER);
+        popupBox.setPrefSize(20, 14);
+        Text popupText = new Text("The rival was lost from connection.");
+        Button closeButton = new Button("quit and start a new game");
+        closeButton.setOnAction(event -> {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("welcome.fxml"));
+            Scene welcomeScene;
+            try {
+                welcomeScene = new Scene(fxmlLoader.load());
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
