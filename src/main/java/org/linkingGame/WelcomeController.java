@@ -188,9 +188,9 @@ public class WelcomeController {
                         root.getChildren().add(button);
                     });
                 } else {
-                    //TODO
+                    String finalResponse = response;
                     Platform.runLater(() -> {
-                        Button button = new Button("Account ID already exists!");
+                        Button button = new Button(finalResponse);
                         button.setOnAction(e -> root.getChildren().remove(button));
                         root.getChildren().add(button);
                     });
@@ -211,25 +211,11 @@ public class WelcomeController {
                     if (response.equals("200 OK matching")) {
                         Platform.runLater(() -> showNode(waitingBox));
                         String matchingResult = in.readLine();
+                        while (matchingResult.equals("LOST THE OTHER PARTY")) {
+                            matchingResult = in.readLine();
+                        }
                         if (matchingResult.equals("200 OK matched")) {
-                            String matchedID = in.readLine();
-                            String rowColResponse = in.readLine();
-                            Platform.runLater(() -> {
-                                hideNode(waitingBox);
-                                Button button = new Button("Matched with " + matchedID);
-                                button.setOnAction(e -> {
-                                    root.getChildren().remove(button);
-                                    if (rowColResponse.equals("choose row and column")) {
-                                        showNode(rowColBox);
-                                    } else if (rowColResponse.equals("no need to choose")) {
-                                        showNode(waitingForBoardBox);
-                                        waitForBoard(in, true);
-                                    } else {
-                                        System.out.println("error!");
-                                    }
-                                });
-                                root.getChildren().add(button);
-                            });
+                            handleMatchedSituation(in);
                         }
                     }
                 } catch (IOException e) {
@@ -242,12 +228,69 @@ public class WelcomeController {
         new Thread(task).start();
     }
 
+    private void handleMatchedSituation(BufferedReader in) throws IOException {
+        String matchedID = in.readLine();
+        while (matchedID.equals("LOST THE OTHER PARTY")) {
+            matchedID = in.readLine();
+        }
+        if (matchedID.equals("200 OK matched")) {
+            handleMatchedSituation(in);
+            return;
+        }
+
+        String rowColResponse = in.readLine();
+        while (rowColResponse.equals("LOST THE OTHER PARTY")) {
+            rowColResponse = in.readLine();
+        }
+        if (rowColResponse.equals("200 OK matched")) {
+            handleMatchedSituation(in);
+            return;
+        }
+
+        String finalMatchedID = matchedID;
+        String finalRowColResponse = rowColResponse;
+        Platform.runLater(() -> {
+            hideNode(waitingBox);
+            Button button = new Button("Matched with " + finalMatchedID);
+            button.setOnAction(e -> {
+                root.getChildren().remove(button);
+                if (finalRowColResponse.equals("choose row and column")) {
+                    showNode(rowColBox);
+                } else if (finalRowColResponse.equals("no need to choose")) {
+                    showNode(waitingForBoardBox);
+                    waitForBoard(in, true);
+                } else {
+                    System.out.println("error!");
+                }
+            });
+            root.getChildren().add(button);
+        });
+    }
+
     private void waitForBoard(BufferedReader in, boolean myTurn) {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
                 try {
                     String boardReadyResult = in.readLine();
+                    if (boardReadyResult.equals("LOST THE OTHER PARTY")) {
+                        Platform.runLater(() -> {
+                            hideNode(waitingForBoardBox);
+                            Button button = new Button("The other party quit. Start matching again.");
+                            button.setOnAction(e -> {
+                                root.getChildren().remove(button);
+                                showNode(waitingBox);
+                            });
+                            root.getChildren().add(button);
+                        });
+
+                        while (boardReadyResult.equals("LOST THE OTHER PARTY")) {
+                            boardReadyResult = in.readLine();
+                        }
+                        if (boardReadyResult.equals("200 OK matched")) {
+                            handleMatchedSituation(in);
+                        }
+                    }
                     if (boardReadyResult.equals("board settled")) {
                         Platform.runLater(() -> hideNode(waitingForBoardBox));
                         //receive the board
@@ -266,7 +309,6 @@ public class WelcomeController {
                             try {
                                 gameScene = new Scene(fxmlLoader.load());
                             } catch (IOException e) {
-                                //TODO: exception?
                                 throw new RuntimeException(e);
                             }
 
@@ -281,7 +323,6 @@ public class WelcomeController {
                             try {
                                 gameController.setClientSocket(clientSocket);
                             } catch (IOException e) {
-                                //TODO: exception?
                                 throw new RuntimeException(e);
                             }
                             gameController.createGameBoard();

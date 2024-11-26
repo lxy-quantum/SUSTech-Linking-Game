@@ -187,6 +187,8 @@ public class GameService implements Runnable {
                 OutputStream out1 = playerSocket1.getOutputStream();
                 out1.write("LOST RIVAL\n".getBytes());
                 out1.flush();
+                //confirm player2 lost
+                player2.setLoggedOut();
                 //switch to beginning service for player1
                 BeginningService service = new BeginningService(playerSocket1, players, matchingClientMap, pickingClientMap);
                 service.setClientId(player1.ID);
@@ -194,6 +196,7 @@ public class GameService implements Runnable {
             } catch (IOException ex) {
                 try {
                     //lost player1
+                    player1.setLoggedOut();
                     OutputStream out2 = playerSocket2.getOutputStream();
                     out2.write("LOST RIVAL\n".getBytes());
                     out2.flush();
@@ -203,7 +206,7 @@ public class GameService implements Runnable {
                     new Thread(service).start();
                 } catch (IOException exception) {
                     //both clients are lost
-                    throw new RuntimeException(exception);
+                    player2.setLoggedOut();
                 }
             }
         }

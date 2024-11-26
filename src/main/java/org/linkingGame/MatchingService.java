@@ -1,6 +1,7 @@
 package org.linkingGame;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
@@ -35,14 +36,20 @@ public class MatchingService implements Runnable{
 
                 int[][] board = null;
                 try {
-                    PrintWriter out1 = new PrintWriter(playerSocket1.getOutputStream(), true);
-                    PrintWriter out2 = new PrintWriter(playerSocket2.getOutputStream(), true);
-                    out1.println("200 OK matched");
-                    out2.println("200 OK matched");
-                    out1.println(player2ID);
-                    out2.println(player1ID);
-                    out1.println("choose row and column");
-                    out2.println("no need to choose");
+                    OutputStream out1 = playerSocket1.getOutputStream();
+                    OutputStream out2 = playerSocket2.getOutputStream();
+                    out1.write("200 OK matched\n".getBytes());
+                    out1.flush();
+                    out2.write("200 OK matched\n".getBytes());
+                    out2.flush();
+                    out1.write((player2ID + "\n").getBytes());
+                    out1.flush();
+                    out2.write((player1ID + "\n").getBytes());
+                    out2.flush();
+                    out1.write("choose row and column\n".getBytes());
+                    out1.flush();
+                    out2.write("no need to choose\n".getBytes());
+                    out2.flush();
 
                     Scanner in1 = new Scanner(playerSocket1.getInputStream());
                     String command = in1.next();
@@ -57,23 +64,53 @@ public class MatchingService implements Runnable{
                             game = new Game(board);
                         }
 
-                        out1.println("board settled");
-                        out1.println(row);
-                        out1.println(col);
-                        out2.println("board settled");
-                        out2.println(row);
-                        out2.println(col);
+                        out1.write("board settled\n".getBytes());
+                        out1.flush();
+                        out1.write((row + "\n").getBytes());
+                        out1.flush();
+                        out1.write((col + "\n").getBytes());
+                        out1.flush();
+                        out2.write("board settled\n".getBytes());
+                        out2.flush();
+                        out2.write((row + "\n").getBytes());
+                        out2.flush();
+                        out2.write((col + "\n").getBytes());
+                        out2.flush();
 
                         for (int i = 0; i < row; i++) {
                             for (int j = 0; j < col; j++) {
                                 int chess = board[i][j];
-                                out1.println(chess);
-                                out2.println(chess);
+                                out1.write((chess + "\n").getBytes());
+                                out1.flush();
+                                out2.write((chess + "\n").getBytes());
+                                out2.flush();
                             }
                         }
                     }
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    try {
+                        //assume player2 lost
+                        OutputStream out1 = playerSocket1.getOutputStream();
+                        out1.write("LOST THE OTHER PARTY\n".getBytes());
+                        out1.flush();
+                        //confirm player2 lost
+                        players.get(player2ID).setLoggedOut();
+                        //put player1 back to waiting queue
+                        matchingClientMap.put(player1ID, playerSocket1);
+                    } catch (IOException ex) {
+                        try {
+                            //player1 lost
+                            players.get(player1ID).setLoggedOut();
+                            OutputStream out2 = playerSocket2.getOutputStream();
+                            out2.write("LOST THE OTHER PARTY\n".getBytes());
+                            out2.flush();
+                            //put player2 back to waiting queue
+                            matchingClientMap.put(player2ID, playerSocket2);
+                        } catch (IOException exception) {
+                            //both players are lost
+                            players.get(player2ID).setLoggedOut();
+                        }
+                    }
                 }
 
                 Player player1 = players.get(player1ID);
