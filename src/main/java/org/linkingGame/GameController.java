@@ -401,6 +401,13 @@ public class GameController {
             protected Void call() throws Exception {
                 String response = in.readLine();
                 if (response.equals("continue")) {
+                    String turn = in.readLine();
+                    if (turn.equals("not your turn")) {
+                        myTurn = false;
+                        rivalPlaying();
+                    } else {
+                        myTurn = true;
+                    }
                     Platform.runLater(() -> gamePane.getChildren().remove(popupBox));
                 }
                 return null;

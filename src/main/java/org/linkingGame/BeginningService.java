@@ -89,7 +89,7 @@ public class BeginningService implements Runnable {
                                         out.println(board[i][j]);
                                     }
                                 }
-                                gameService.noticeRivalForBack(clientId);
+                                gameService.noticeRivalForBack(clientId, players.get(clientId).myTurnOngoing, socket);
                                 gameService.run();
                                 players.get(clientId).disconnected = false;
                             } else {

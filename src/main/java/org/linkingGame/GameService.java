@@ -19,7 +19,8 @@ public class GameService implements Runnable {
     private boolean gaming = false;
 
     private final Player player1, player2;
-    private final Socket playerSocket1, playerSocket2;
+    private Socket playerSocket1;
+    private Socket playerSocket2;
     private Game game;
     private final int[] position = new int[2];
     private int score1 = 0, score2 = 0;
@@ -298,13 +299,27 @@ public class GameService implements Runnable {
         return game.board;
     }
 
-    public void noticeRivalForBack(String selfId) throws IOException {
+    public void noticeRivalForBack(String selfId, boolean selfTurn, Socket selfSocket) throws IOException {
         if (selfId.equals(player1.ID)) {
+            player1Turn = selfTurn;
+            playerSocket1 = selfSocket;
             PrintWriter printWriter2 = new PrintWriter(playerSocket2.getOutputStream(), true);
             printWriter2.println("continue");
+            if (player1Turn) {
+                printWriter2.println("not your turn");
+            } else {
+                printWriter2.println("your turn");
+            }
         } else {
+            player1Turn = !selfTurn;
+            playerSocket2 = selfSocket;
             PrintWriter printWriter1 = new PrintWriter(playerSocket1.getOutputStream(), true);
             printWriter1.println("continue");
+            if (player1Turn) {
+                printWriter1.println("your turn");
+            } else {
+                printWriter1.println("not your turn");
+            }
         }
     }
 }
