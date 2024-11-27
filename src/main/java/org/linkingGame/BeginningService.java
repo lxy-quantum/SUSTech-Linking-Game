@@ -70,6 +70,38 @@ public class BeginningService implements Runnable {
                             out.println(gameRecord.rivalScore);
                         }
                     }
+                    case "BACK": {
+                        if (players.get(clientId).disconnected) {
+                            if (players.get(clientId).ongoingGameService.isGaming()) {
+                                out.println("back");
+                                if (players.get(clientId).myTurnOngoing) {
+                                    out.println("my turn");
+                                } else {
+                                    out.println("not my turn");
+                                }
+                                GameService gameService = players.get(clientId).ongoingGameService;
+                                int[][] board = gameService.getGameBoard();
+                                out.println("board settled");
+                                out.println(board.length);
+                                out.println(board[0].length);
+                                for (int i = 0; i < board.length; i++) {
+                                    for (int j = 0; j < board[0].length; j++) {
+                                        out.println(board[i][j]);
+                                    }
+                                }
+                                gameService.noticeRivalForBack(clientId);
+                                gameService.run();
+                                players.get(clientId).disconnected = false;
+                            } else {
+                                players.get(clientId).ongoingGameService = null;
+                                players.get(clientId).ongoingRival = null;
+                                players.get(clientId).disconnected = false;
+                                out.println("nothing");
+                            }
+                        } else {
+                            out.println("nothing");
+                        }
+                    }
                 }
             } catch (Exception e) {
                 if (clientId != null) {
@@ -81,6 +113,7 @@ public class BeginningService implements Runnable {
                         e.printStackTrace();
                     }
                 }
+                return;
             }
         }
     }

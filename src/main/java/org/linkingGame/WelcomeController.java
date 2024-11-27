@@ -415,6 +415,35 @@ public class WelcomeController {
     }
 
     @FXML
+    public void goBackToGame(ActionEvent event) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
+                try {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    out.println("BACK");
+                    String response = in.readLine();
+                    if (response.equals("nothing")) {
+                        Platform.runLater(() -> addPopup(root, "No games to go back"));
+                    } else if (response.equals("back")) {
+                        boolean myTurn = false;
+                        String turn = in.readLine();
+                        if (turn.equals("my turn")) {
+                            myTurn = true;
+                        }
+                        waitForBoard(in, myTurn);
+                    }
+                } catch (IOException e) {
+                    dealWithConnLoss();
+                }
+                return null;
+            }
+        };
+        new Thread(task).start();
+    }
+
+    @FXML
     public void handleStart() {
         int row, col;
         try {

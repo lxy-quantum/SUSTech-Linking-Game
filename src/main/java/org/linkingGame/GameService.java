@@ -16,11 +16,14 @@ public class GameService implements Runnable {
 
     private static final Logger logger = Logger.getLogger(GameService.class.getName());
 
+    private boolean gaming = false;
+
     private final Player player1, player2;
     private final Socket playerSocket1, playerSocket2;
     private Game game;
     private final int[] position = new int[2];
     private int score1 = 0, score2 = 0;
+    boolean player1Turn = false;
 
     public GameService(ConcurrentHashMap<String, Player> players, ConcurrentMap<String, Socket> matchingClientMap,
                        ConcurrentMap<String, Socket> pickingClientMap, Player player1, Player player2,
@@ -38,15 +41,22 @@ public class GameService implements Runnable {
 
     @Override
     public void run() {
+        gaming = true;
         try {
+            player1.ongoingGameService = this;
+            player1.ongoingRival = player2.ID;
+            player2.ongoingGameService = this;
+            player2.ongoingRival = player1.ID;
+
             Scanner in1 = new Scanner(playerSocket1.getInputStream());
             Scanner in2 = new Scanner(playerSocket2.getInputStream());
             PrintStream out1 = new PrintStream(playerSocket1.getOutputStream(), true);
             PrintStream out2 = new PrintStream(playerSocket2.getOutputStream(), true);
 
-            boolean player1Turn = false;
+            player1Turn = false;
             while (true) {
                 if (!game.hasAnyLinkingPairs()) {
+                    gaming = false;
                     if (score1 > score2) {
                         player1.addGameRecord(player2.ID, true, false, score1, score2);
                         player2.addGameRecord(player1.ID, false, false, score2, score1);
@@ -93,6 +103,10 @@ public class GameService implements Runnable {
 
                         out2.println(score2);
                     }
+                    player1.ongoingGameService = null;
+                    player1.ongoingRival = null;
+                    player2.ongoingGameService = null;
+                    player2.ongoingRival = null;
                     //switch to beginning service
                     BeginningService service1 = new BeginningService(playerSocket1, players, matchingClientMap, pickingClientMap);
                     service1.setClientId(player1.ID);
@@ -204,34 +218,62 @@ public class GameService implements Runnable {
                 out1.write("LOST RIVAL\n".getBytes());
                 out1.flush();
                 //confirm player2 lost
-                player2.setLoggedOut();
-                //save the logged-out info
-                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
-                    oos.writeObject(players);
-                } catch (IOException ioe) {
-                    e.printStackTrace();
-                }
-                //switch to beginning service for player1
-                BeginningService service = new BeginningService(playerSocket1, players, matchingClientMap, pickingClientMap);
-                service.setClientId(player1.ID);
-                new Thread(service).start();
-            } catch (IOException ex) {
-                try {
-                    //lost player1
-                    player1.setLoggedOut();
+                BufferedReader in1 = new BufferedReader(new InputStreamReader(playerSocket1.getInputStream()));
+                String request = in1.readLine();
+                if (request.equals("QUIT")) {
+                    gaming = false;
+                    player2.setLoggedOut();
                     //save the logged-out info
                     try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
                         oos.writeObject(players);
                     } catch (IOException ioe) {
                         e.printStackTrace();
                     }
+                    //switch to beginning service for player1
+                    BeginningService service = new BeginningService(playerSocket1, players, matchingClientMap, pickingClientMap);
+                    service.setClientId(player1.ID);
+                    new Thread(service).start();
+                } else if (request.equals("WAIT")) {
+                    player2.setDisconnectedFromGame(!player1Turn);
+                    //save the logged-out info
+                    try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                        oos.writeObject(players);
+                    } catch (IOException ioe) {
+                        e.printStackTrace();
+                    }
+                }
+
+            } catch (IOException ex) {
+                try {
+                    //lost player1
                     OutputStream out2 = playerSocket2.getOutputStream();
                     out2.write("LOST RIVAL\n".getBytes());
                     out2.flush();
-                    //switch to beginning service for player2
-                    BeginningService service = new BeginningService(playerSocket2, players, matchingClientMap, pickingClientMap);
-                    service.setClientId(player2.ID);
-                    new Thread(service).start();
+
+                    BufferedReader in2 = new BufferedReader(new InputStreamReader(playerSocket2.getInputStream()));
+                    String request = in2.readLine();
+                    if (request.equals("QUIT")) {
+                        gaming = false;
+                        player1.setLoggedOut();
+                        //save the logged-out info
+                        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                            oos.writeObject(players);
+                        } catch (IOException ioe) {
+                            e.printStackTrace();
+                        }
+                        //switch to beginning service for player2
+                        BeginningService service = new BeginningService(playerSocket2, players, matchingClientMap, pickingClientMap);
+                        service.setClientId(player2.ID);
+                        new Thread(service).start();
+                    } else if (request.equals("WAIT")) {
+                        player1.setDisconnectedFromGame(player1Turn);
+                        //save the logged-out info
+                        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("players.ser"))) {
+                            oos.writeObject(players);
+                        } catch (IOException ioe) {
+                            e.printStackTrace();
+                        }
+                    }
                 } catch (IOException exception) {
                     //both clients are lost
                     player2.setLoggedOut();
@@ -245,6 +287,24 @@ public class GameService implements Runnable {
                     logger.log(Level.SEVERE, "both clients are lost from connection: ", exception);
                 }
             }
+        }
+    }
+
+    public boolean isGaming() {
+        return gaming;
+    }
+
+    public int[][] getGameBoard() {
+        return game.board;
+    }
+
+    public void noticeRivalForBack(String selfId) throws IOException {
+        if (selfId.equals(player1.ID)) {
+            PrintWriter printWriter2 = new PrintWriter(playerSocket2.getOutputStream(), true);
+            printWriter2.println("continue");
+        } else {
+            PrintWriter printWriter1 = new PrintWriter(playerSocket1.getOutputStream(), true);
+            printWriter1.println("continue");
         }
     }
 }

@@ -359,6 +359,9 @@ public class GameController {
         Text popupText = new Text("The rival was lost from connection.");
         Button closeButton = new Button("quit and start a new game");
         closeButton.setOnAction(event -> {
+            Thread thread = new Thread(() -> out.println("QUIT"));
+            thread.start();
+
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("welcome.fxml"));
             Scene welcomeScene;
             try {
@@ -377,8 +380,33 @@ public class GameController {
             stage.setTitle("Welcome");
             stage.setScene(welcomeScene);
         });
-        popupBox.getChildren().addAll(popupText, closeButton);
+        Button waitButton = new Button("wait for the rival to come back");
+        waitButton.setOnAction(e -> {
+            Thread thread = new Thread(() -> out.println("WAIT"));
+            thread.start();
+
+            waitForRivalBack(popupBox);
+            Text text = new Text("Waiting for the rival to come back...");
+            popupBox.getChildren().add(text);
+            popupBox.getChildren().remove(closeButton);
+            popupBox.getChildren().remove(waitButton);
+        });
+        popupBox.getChildren().addAll(popupText, closeButton, waitButton);
         gamePane.getChildren().add(popupBox);
+    }
+
+    private void waitForRivalBack(VBox popupBox) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                String response = in.readLine();
+                if (response.equals("continue")) {
+                    Platform.runLater(() -> gamePane.getChildren().remove(popupBox));
+                }
+                return null;
+            }
+        };
+        new Thread(task).start();
     }
 
     public void deleteGrid(Button button, int row, int col) {
