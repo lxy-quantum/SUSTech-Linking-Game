@@ -1,9 +1,6 @@
 # SUSTech-Linking-Game
 Assignment 2 for CS209A of SUSTech.
 
-# Below is the Demo:
-# CS209A Assignment 2 Demo
-
 ## Environment
 
 **java JDK**: openjdk-22 (Oracle OpenJDK 22.0.2)
@@ -16,28 +13,28 @@ Assignment 2 for CS209A of SUSTech.
 
 ## File List
 
-**Application.java**: the main entry point of the demo application
+**GameServer.java**: the multithreading server of game
+
+**ClientApplication.java**: the main entry point of the client
+
+**Player.java**: stores individual player info
+
+**WelcomeController.java**: handles JavaFX UI interactions and events for user's beginning activities
+
+**BeginningService.java**: the Runnable service of server handling user's beginning activities
+
+**MatchingService.java**: the Runnable service of server handling user's random matching
 
 **Game.java**: manages the game logic and controls the game's behavior
 
-**Controller.java**: handles JavaFX UI interactions and events
+**LinkingResult.java**: the result of linking during game
 
-**board.fxml**: a game board prototype
+**GameController.java**: handles JavaFX UI interactions and events for game
+
+**GameService.java**: the Runnable service of server handling two players' online game
+
+**welcome.fxml**: the welcome UI
+
+**board.fxml**: the game board UI
 
 **resources**: stores pictures for the game board (https://www.iconfont.cn/)
-
-## Logic
-
-- game start: allowing the user to select options and set up the game board
-
-- operations validity: monitoring user actions, validating operations, and updating the board
-
-- game finish: informing the user that the game has ended
-
-## Notes
-
-I suggest that you first complete the single-player mode. If you feel confident, you can directly reconstruct this project to include a two-player mode.
-
-If you encounter any GUI issues while rendering multiple game boards, maybe you can check the $start$ method in the main entry point.
-
-If you have any questions or find any bugs, feel free to contact me 12442018@mail.sustech.edu.cn or QQ:503652093 :)
